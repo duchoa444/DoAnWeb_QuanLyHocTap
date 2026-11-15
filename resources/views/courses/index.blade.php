@@ -10,9 +10,9 @@
         </div>
     @endif
 
-    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; align-items: stretch;">
         @forelse($courses as $course)
-            <div style="flex: 1 1 calc(33.333% - 20px); min-width: 280px;">
+            <div style="display: flex; flex-direction: column;">
                 @include('course-card', ['course' => $course])
             </div>
         @empty
