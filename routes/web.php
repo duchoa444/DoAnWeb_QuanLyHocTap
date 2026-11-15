@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -40,6 +39,9 @@ Route::middleware(['auth', 'role:teacher'])->group(function () {
         return 'Xin chào! Đây là trang giảng viên.';
     });
 
+    // Quản lý khóa học HT-09
+    Route::resource('/teacher/courses', CourseController::class)
+        ->names('teacher.courses');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -49,5 +51,4 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     });
 
 });
-Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
     
