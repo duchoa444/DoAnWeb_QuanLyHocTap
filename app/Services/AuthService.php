@@ -28,7 +28,7 @@ class AuthService
     {
         $user = $this->userRepository->findByEmail($data['email']);
 
-        if (!$user) {
+        if (!$user || !$user->is_active) {
             return false;
         }
 

@@ -4,6 +4,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\Admin\UserManagementController;
 
 Route::redirect('/', '/courses');
 
@@ -48,6 +49,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         return 'Xin chào! Đây là trang quản trị viên.';
     });
 
+    Route::get('/admin/users', [UserManagementController::class, 'index'])
+        ->name('admin.users.index');
+    Route::post('/admin/users', [UserManagementController::class, 'store'])
+        ->name('admin.users.store');
+    Route::patch('/admin/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
+        ->name('admin.users.toggle-status');
 });
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
     
