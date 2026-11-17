@@ -108,5 +108,98 @@
         </div>
     </section>
 </main>
+{{-- ================= PHẦN DUYỆT KHÓA HỌC ĐỒNG BỘ KHUÔN TRÊN ================= --}}
+<section id="courses-section" style="margin-top: 24px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+        <h3 style="margin: 0;">Duyệt khóa học</h3>
+        <span style="font-size: 14px; color: #666;">{{ $pendingCoursesCount }} khóa học chờ duyệt</span>
+    </div>
 
+    <form action="{{ route('admin.users.index') }}#courses-section" method="GET" style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+        @if ($search !== '')
+            <input type="hidden" name="search" value="{{ $search }}">
+        @endif
+
+        <input type="search" name="course_search" value="{{ $courseSearch }}" placeholder="Tìm theo tên khóa học"
+               style="flex: 1; min-width: 200px; padding: 9px; border: 1px solid #ccc; border-radius: 4px;">
+
+        <select name="status" style="padding: 9px; border: 1px solid #ccc; border-radius: 4px; background: #fff;">
+            <option value="" {{ $status === '' ? 'selected' : '' }}>Tất cả trạng thái</option>
+            <option value="draft" {{ $status === 'draft' ? 'selected' : '' }}>Chờ duyệt</option>
+            <option value="published" {{ $status === 'published' ? 'selected' : '' }}>Đã duyệt</option>
+            <option value="hidden" {{ $status === 'hidden' ? 'selected' : '' }}>Đã ẩn vi phạm</option>
+        </select>
+
+        <button type="submit" style="padding: 9px 16px;">Tìm kiếm</button>
+
+        @if ($courseSearch !== '' || $status !== '')
+            <a href="{{ route('admin.users.index', $search !== '' ? ['search' => $search] : []) }}#courses-section" style="padding: 9px;">Xóa tìm kiếm</a>
+        @endif
+    </form>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <th style="padding: 10px;">Tên khóa học</th>
+                    <th style="padding: 10px;">Giảng viên</th>
+                    <th style="padding: 10px;">Ngày gửi</th>
+                    <th style="padding: 10px;">Trạng thái</th>
+                    <th style="padding: 10px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                    @forelse ($courses as $course)
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 10px;">{{ $course->title }}</td>
+                            <td style="padding: 10px;">{{ $course->teacher?->name ?? 'N/A' }}</td>
+                            <td style="padding: 10px;">{{ $course->created_at?->format('d/m/Y') }}</td>
+                            <td style="padding: 10px;">
+                                {{ ['draft' => 'Chờ duyệt', 'pending' => 'Chờ duyệt', 'published' => 'Đã duyệt', 'public' => 'Đã duyệt', 'hidden' => 'Đã ẩn vi phạm'][$course->status] ?? $course->status }}
+                            </td>
+                            <td style="padding: 10px;">
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <button type="button"
+                                            data-title="{{ $course->title }}"
+                                            data-teacher="{{ $course->teacher?->name ?? 'N/A' }}"
+                                            data-category="{{ $course->category?->name ?? 'Chưa phân loại' }}"
+                                            data-description="{{ $course->description ?? 'Không có mô tả' }}"
+                                            onclick="openCoursePreview(this)"
+                                            style="padding: 6px 10px; border: 0; border-radius: 4px; background: #6c757d; color: #fff; cursor: pointer;">
+                                        Xem
+                                    </button>
+
+                                    @if (!in_array($course->status, ['published', 'public'], true))
+                                        <form action="{{ route('admin.courses.approve', $course) }}" method="POST" style="margin: 0;">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" style="padding: 6px 10px; border: 0; border-radius: 4px; background: #28a745; color: #fff; cursor: pointer;">
+                                                Duyệt
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    @if ($course->status !== 'hidden')
+                                        <form action="{{ route('admin.courses.hide', $course) }}" method="POST" style="margin: 0;"
+                                              onsubmit="return confirm('Xác nhận từ chối / ẩn khóa học vi phạm này?');">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" style="padding: 6px 10px; border: 0; border-radius: 4px; background: #dc3545; color: #fff; cursor: pointer;">
+                                                Từ chối
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" style="padding: 16px; text-align: center;">Không tìm thấy khóa học.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 16px;">
 @include('footer')

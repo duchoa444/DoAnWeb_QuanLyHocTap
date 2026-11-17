@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
+use App\Services\CourseService;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\UserService;
@@ -12,15 +12,34 @@ use Illuminate\Http\Request;
 class UserManagementController extends Controller
 {
     public function __construct(
-        protected UserService $userService
+        protected UserService $userService,
+        protected CourseService $courseService
     ) {}
-
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));
         $users = $this->userService->getUsersList($search);
 
-        return view('admin.users.index', compact('users', 'search'));
+        // Lấy tham số tìm kiếm & lọc trạng thái cho phần Duyệt khóa học
+        $courseSearch = trim((string) $request->query('course_search', ''));
+        $status = trim((string) $request->query('status', ''));
+
+        $allowedStatuses = ['', 'draft', 'published', 'hidden'];
+        if (!in_array($status, $allowedStatuses, true)) {
+            $status = '';
+        }
+
+        $courses = $this->courseService->getAdminCoursesList($courseSearch, $status);
+        $pendingCoursesCount = $this->courseService->getPendingCoursesCount();
+
+        return view('admin.users.index', compact(
+            'users',
+            'search',
+            'courses',
+            'pendingCoursesCount',
+            'courseSearch',
+            'status'
+        ));
     }
 
     public function store(Request $request): RedirectResponse
