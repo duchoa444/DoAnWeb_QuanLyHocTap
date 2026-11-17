@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UserRepository
 {
+    public function findByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
     public function paginateWithSearch(string $search = '', int $perPage = 10): LengthAwarePaginator
     {
         return User::query()

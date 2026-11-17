@@ -18,7 +18,7 @@ DoAnWeb_QuanLyHocTap/
 │   ├── wireframe/            # Thiết kế giao diện các màn hình chính
 │   ├── architecture.png      # Sơ đồ kiến trúc hệ thống và luồng route 3 vai trò
 │   ├── cau-truc-thu-muc.md   # Tài liệu mô tả cấu trúc thư mục dự án
-│   ├── de-cuong.md           # Đề cương dự án
+│   ├── Decuong.md           # Đề cương dự án
 │   ├── git-rules.md          # Quy ước nhánh Git, commit và quy trình review PR
 │   ├── moc-1.md              # Tài liệu tổng hợp báo cáo Mốc 1
 │   └── test-cases.md         # Bộ kịch bản kiểm thử chức năng (HT-03, HT-06...)

@@ -1,9 +1,10 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\UserManagementController;
 
 Route::redirect('/', '/courses');
@@ -28,33 +29,34 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth');
 
 Route::middleware(['auth', 'role:student'])->group(function () {
-
     Route::get('/student/dashboard', function () {
         return 'Xin chào! Đây là trang học viên.';
     });
-
 });
 
 Route::middleware(['auth', 'role:teacher'])->group(function () {
-
     Route::get('/teacher/dashboard', function () {
         return 'Xin chào! Đây là trang giảng viên.';
     });
-
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-
-    Route::get('/admin/dashboard', function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
         return 'Xin chào! Đây là trang quản trị viên.';
-    });
+    })->name('dashboard');
 
-    Route::get('/admin/users', [UserManagementController::class, 'index'])
-        ->name('admin.users.index');
-    Route::post('/admin/users', [UserManagementController::class, 'store'])
-        ->name('admin.users.store');
-    Route::patch('/admin/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
-        ->name('admin.users.toggle-status');
+    // Quản lý tài khoản (HT-14)
+    Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
+    Route::patch('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
+
+    // Duyệt và ẩn khóa học vi phạm (HT-15 - gộp chung trang admin/users)
+    Route::get('/courses', [UserManagementController::class, 'index'])->name('courses.index');
+    Route::patch('/courses/{course}/approve', [AdminCourseController::class, 'approve'])->name('courses.approve');
+    Route::patch('/courses/{course}/hide', [AdminCourseController::class, 'hide'])->name('courses.hide');
+
+    // CRUD Danh mục (HT-15)
+    Route::resource('categories', AdminCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
 });
+
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
-    
