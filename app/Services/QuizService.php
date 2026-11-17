@@ -2,10 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Course;
-use App\Models\Enrollment;
-use App\Models\Question;
-use App\Models\QuizAttempt;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -18,10 +14,14 @@ class QuizService
     public function start(int $userId, int $courseId): array
     {
         return DB::transaction(function () use ($userId, $courseId) {
-            $course = Course::findOrFail($courseId);
+            $course = DB::table('courses')->where('id', $courseId)->first();
+            if (!$course) {
+                throw new Exception('Không tìm thấy khóa học.', 404);
+            }
 
             // 1. Chỉ học viên đã ghi danh mới được làm bài (HT-NFR2)
-            $isEnrolled = Enrollment::where('user_id', $userId)
+            $isEnrolled = DB::table('enrollments')
+                ->where('user_id', $userId)
                 ->where('course_id', $courseId)
                 ->exists();
 
@@ -30,7 +30,8 @@ class QuizService
             }
 
             // 2. Lấy câu hỏi 4 lựa chọn, TUYỆT ĐỐI KHÔNG lấy cột correct_option (HT-NFR1)
-            $questions = Question::where('course_id', $courseId)
+            $questions = DB::table('questions')
+                ->where('course_id', $courseId)
                 ->select('id', 'course_id', 'question_text', 'option_a', 'option_b', 'option_c', 'option_d')
                 ->get();
 
@@ -41,8 +42,9 @@ class QuizService
             $minutes = $course->quiz_minutes ?? 15;
             $now = Carbon::now();
 
-            // 3. Nếu đang có lượt làm dở (chưa nộp) và vẫn còn hạn -> trả về làm tiếp (tránh F5 mất lượt)
-            $activeAttempt = QuizAttempt::where('user_id', $userId)
+            // 3. Nếu đang có lượt làm dở (chưa nộp) và vẫn còn hạn -> trả về làm tiếp
+            $activeAttempt = DB::table('quiz_attempts')
+                ->where('user_id', $userId)
                 ->where('course_id', $courseId)
                 ->whereNull('submitted_at')
                 ->lockForUpdate()
@@ -51,7 +53,8 @@ class QuizService
             if ($activeAttempt) {
                 $deadline = Carbon::parse($activeAttempt->started_at)->addMinutes($minutes)->addMinute();
                 if ($now->lte($deadline)) {
-                    $attemptCount = QuizAttempt::where('user_id', $userId)
+                    $attemptCount = DB::table('quiz_attempts')
+                        ->where('user_id', $userId)
                         ->where('course_id', $courseId)
                         ->count();
 
@@ -64,15 +67,19 @@ class QuizService
                     ];
                 }
 
-                // Nếu lượt cũ đã quá hạn mà chưa nộp -> tự động chốt 0 điểm
-                $activeAttempt->update([
-                    'submitted_at' => $deadline,
-                    'score'        => 0,
-                ]);
+                // Quá hạn mà chưa nộp -> tự động chốt 0 điểm
+                DB::table('quiz_attempts')
+                    ->where('id', $activeAttempt->id)
+                    ->update([
+                        'submitted_at' => $deadline,
+                        'score'        => 0,
+                        'updated_at'   => $now,
+                    ]);
             }
 
             // 4. Giới hạn tối đa 3 lần làm bài (HT-06)
-            $attemptCount = QuizAttempt::where('user_id', $userId)
+            $attemptCount = DB::table('quiz_attempts')
+                ->where('user_id', $userId)
                 ->where('course_id', $courseId)
                 ->lockForUpdate()
                 ->count();
@@ -82,11 +89,15 @@ class QuizService
             }
 
             // 5. Tạo lượt làm bài mới, chốt giờ bắt đầu tại Server
-            $attempt = QuizAttempt::create([
+            $attemptId = DB::table('quiz_attempts')->insertGetId([
                 'user_id'    => $userId,
                 'course_id'  => $courseId,
                 'started_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
+
+            $attempt = DB::table('quiz_attempts')->where('id', $attemptId)->first();
 
             return [
                 'course'       => $course,
@@ -104,9 +115,12 @@ class QuizService
     public function submit(int $attemptId, int $userId, array $answers): array
     {
         return DB::transaction(function () use ($attemptId, $userId, $answers) {
-            $attempt = QuizAttempt::with('course')->lockForUpdate()->findOrFail($attemptId);
+            $attempt = DB::table('quiz_attempts')->where('id', $attemptId)->lockForUpdate()->first();
+            if (!$attempt) {
+                throw new Exception('Không tìm thấy lượt làm bài.', 404);
+            }
 
-            if ($attempt->user_id !== $userId) {
+            if ((int) $attempt->user_id !== $userId) {
                 throw new Exception('Bạn không có quyền nộp bài thi này.', 403);
             }
 
@@ -114,21 +128,26 @@ class QuizService
                 throw new Exception('Lượt làm bài này đã được nộp trước đó.', 400);
             }
 
+            $course = DB::table('courses')->where('id', $attempt->course_id)->first();
+
             // Kiểm tra thời gian tại Server: started_at + quiz_minutes + 1 phút dung sai (HT-NFR1)
             $now = Carbon::now();
-            $minutes = $attempt->course->quiz_minutes ?? 15;
+            $minutes = $course->quiz_minutes ?? 15;
             $deadline = Carbon::parse($attempt->started_at)->addMinutes($minutes)->addMinute();
 
             if ($now->gt($deadline)) {
-                $attempt->update([
-                    'submitted_at' => $now,
-                    'score'        => 0,
-                ]);
+                DB::table('quiz_attempts')
+                    ->where('id', $attemptId)
+                    ->update([
+                        'submitted_at' => $now,
+                        'score'        => 0,
+                        'updated_at'   => $now,
+                    ]);
                 throw new Exception('Đã quá thời gian làm bài quy định, bài nộp bị từ chối.', 422);
             }
 
             // Chấm điểm tự động tại Server
-            $questions = Question::where('course_id', $attempt->course_id)->get();
+            $questions = DB::table('questions')->where('course_id', $attempt->course_id)->get();
             $totalQuestions = $questions->count();
             $correctCount = 0;
 
@@ -141,19 +160,25 @@ class QuizService
 
             $score = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 10, 2) : 0;
 
-            $attempt->update([
-                'submitted_at' => $now,
-                'score'        => $score,
-            ]);
+            DB::table('quiz_attempts')
+                ->where('id', $attemptId)
+                ->update([
+                    'submitted_at' => $now,
+                    'score'        => $score,
+                    'updated_at'   => $now,
+                ]);
+
+            $updatedAttempt = DB::table('quiz_attempts')->where('id', $attemptId)->first();
 
             // Lấy điểm cao nhất trong tối đa 3 lần làm bài (HT-06)
-            $bestScore = QuizAttempt::where('user_id', $userId)
+            $bestScore = DB::table('quiz_attempts')
+                ->where('user_id', $userId)
                 ->where('course_id', $attempt->course_id)
                 ->whereNotNull('submitted_at')
                 ->max('score');
 
             return [
-                'attempt'         => $attempt,
+                'attempt'         => $updatedAttempt,
                 'score'           => $score,
                 'best_score'      => $bestScore,
                 'correct_count'   => $correctCount,
