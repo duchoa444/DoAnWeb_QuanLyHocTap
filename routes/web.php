@@ -3,43 +3,38 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\QuizController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\UserManagementController;
 
 Route::redirect('/', '/courses');
 
-// Hiển thị trang đăng ký
-Route::get('/register', function () {
-    return view('auth.register');
-});
-
-// Xử lý đăng ký
+// Khách vãng lai: Đăng ký, đăng nhập (HT-03)
+Route::get('/register', fn () => view('auth.register'))->name('register');
 Route::post('/register', [AuthController::class, 'register']);
-
-// Hiển thị trang đăng nhập
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-// Xử lý đăng nhập
+Route::get('/login', fn () => view('auth.login'))->name('login');
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-Route::post('/logout', [AuthController::class, 'logout'])
-    ->middleware('auth');
+// Danh sách khóa học công khai (HT-01)
+Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 
+// Phân hệ Học viên (student) - HT-03, HT-06
 Route::middleware(['auth', 'role:student'])->group(function () {
-    Route::get('/student/dashboard', function () {
-        return 'Xin chào! Đây là trang học viên.';
-    });
+    Route::get('/student/dashboard', fn () => 'Xin chào! Đây là trang học viên.');
+    Route::post('/courses/{course}/quiz/start', [QuizController::class, 'start'])->name('quiz.start');
+    Route::post('/quiz/{attempt}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
 });
 
+// Phân hệ Giảng viên (teacher)
 Route::middleware(['auth', 'role:teacher'])->group(function () {
     Route::get('/teacher/dashboard', function () {
         return 'Xin chào! Đây là trang giảng viên.';
     });
 });
 
+// Phân hệ Quản trị viên (admin) - HT-14, HT-15
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
         return 'Xin chào! Đây là trang quản trị viên.';
@@ -58,5 +53,3 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // CRUD Danh mục (HT-15)
     Route::resource('categories', AdminCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
 });
-
-Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
