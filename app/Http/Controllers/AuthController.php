@@ -26,7 +26,7 @@ class AuthController extends Controller
         // Tài khoản đăng ký công khai mặc định là học viên
         $data['role'] = 'student';
 
-        $this->authService->registerStudent($data);
+        $this->authService->register($data);
 
         return redirect('/')
             ->with('success', 'Đăng ký thành công!');
@@ -40,7 +40,7 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = $this->authService->loginAndGetRedirectUrl($data);
+        $user = $this->authService->login($data);
 
         if (!$user) {
             return back()
