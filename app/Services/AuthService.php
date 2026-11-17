@@ -12,7 +12,7 @@ class AuthService
     /**
      * HT-03: Đăng ký chỉ tạo tài khoản học viên (student)[cite: 19]
      */
-    public function registerStudent(array $data): User
+    public function register(array $data): User
     {
         $user = new User();
         $user->name = $data['name'];
@@ -30,7 +30,7 @@ class AuthService
     /**
      * HT-03: Đăng nhập, chặn tài khoản khóa & điều hướng khớp với menu của TV3
      */
-    public function loginAndGetRedirectUrl(array $credentials, bool $remember = false): string
+    public function login(array $credentials, bool $remember = false): string
     {
         $user = User::where('email', $credentials['email'])->first();
 
