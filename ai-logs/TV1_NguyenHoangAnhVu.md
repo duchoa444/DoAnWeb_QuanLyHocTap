@@ -45,3 +45,12 @@ NHẬT KÝ SỬ DỤNG AI - NGUYỄN HOÀNG ANH VŨ (TV1 - LE)
   - Cần chỉ rõ các **luồng phụ, luồng ngoại lệ và ràng buộc nghiệp vụ** (hết giờ, hết lượt, giới hạn dung lượng tệp PDF, xóa mềm dữ liệu) ngay trong prompt để AI sinh đặc tả và biểu đồ tuần tự sát với thực tế triển khai.
   - Khi cần hướng dẫn thao tác trên phần mềm (như Draw.io), nên nêu rõ tên công cụ và mục tiêu thao tác ngay từ đầu để tránh AI tự sinh sản phẩm thay thế.
   - Luôn rà soát, đối chiếu lại tên hàm, thực thể dữ liệu và thông tin thành viên do AI tạo ra với tài liệu chuẩn của nhóm trước khi chốt đưa vào báo cáo đồ án.
+  ## AI-05: Tích hợp chức năng Duyệt khóa học (HT-15) vào trang Quản lý người dùng
+- **Thời gian:** 08:30 - 09:35 (Thứ 3, Ngày 17/11)
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  > "Gộp giao diện Duyệt khóa học (HT-15) vào chung trang admin/users/index.blade.php đồng bộ CSS với phần Quản lý tài khoản (HT-14) theo kiến trúc 3 lớp (Controller - Service - Repository), tách phân trang courses_page, thêm modal xem chi tiết khóa học và xử lý các lỗi xung đột route, truy vấn trạng thái dữ liệu thực tế."
+- **Kết quả AI phản hồi & Đánh giá:**
+  > AI đã cung cấp đầy đủ mã nguồn cho mô hình 3 lớp (UserManagementController, Admin\CourseController, CourseService, CourseRepository) và giao diện Blade đồng nhất với khuôn bảng có sẵn, kèm hộp thoại xem nhanh chi tiết khóa học sử dụng thuộc tính data-*. Ngoài ra, AI hỗ trợ chẩn đoán và sửa chính xác các lỗi phát sinh trong quá trình tích hợp như: đồng bộ trạng thái 'public'/'pending' trong CSDL với bộ lọc 'draft'/'published', chuẩn hóa nhóm route admin.* trong routes/web.php, và khắc phục lỗi biên dịch Blade (@forelse, ký tự toán tử).
+
+- **Bài học rút ra**: Cần đối chiếu trực tiếp giá trị dữ liệu mẫu trong CSDL với điều kiện truy vấn trên code, đồng thời rà soát kỹ trùng lặp hàm/route và cú pháp Blade sau khi ghép mã nguồn.
