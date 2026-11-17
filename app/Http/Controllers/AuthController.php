@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\AuthService;
-
+use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
     protected $authService;
@@ -26,7 +26,7 @@ class AuthController extends Controller
         // Tài khoản đăng ký công khai mặc định là học viên
         $data['role'] = 'student';
 
-        $this->authService->register($data);
+        $this->authService->registerStudent($data);
 
         return redirect('/')
             ->with('success', 'Đăng ký thành công!');
@@ -40,7 +40,7 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = $this->authService->login($data);
+        $user = $this->authService->loginAndGetRedirectUrl($data);
 
         if (!$user) {
             return back()
@@ -55,9 +55,10 @@ class AuthController extends Controller
     }
 
     // Đăng xuất
+    // Đăng xuất
     public function logout(Request $request)
     {
-        $this->authService->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
