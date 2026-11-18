@@ -54,3 +54,24 @@ NHẬT KÝ SỬ DỤNG AI - NGUYỄN HOÀNG ANH VŨ (TV1 - LE)
   > AI đã cung cấp đầy đủ mã nguồn cho mô hình 3 lớp (UserManagementController, Admin\CourseController, CourseService, CourseRepository) và giao diện Blade đồng nhất với khuôn bảng có sẵn, kèm hộp thoại xem nhanh chi tiết khóa học sử dụng thuộc tính data-*. Ngoài ra, AI hỗ trợ chẩn đoán và sửa chính xác các lỗi phát sinh trong quá trình tích hợp như: đồng bộ trạng thái 'public'/'pending' trong CSDL với bộ lọc 'draft'/'published', chuẩn hóa nhóm route admin.* trong routes/web.php, và khắc phục lỗi biên dịch Blade (@forelse, ký tự toán tử).
 
 - **Bài học rút ra**: Cần đối chiếu trực tiếp giá trị dữ liệu mẫu trong CSDL với điều kiện truy vấn trên code, đồng thời rà soát kỹ trùng lặp hàm/route và cú pháp Blade sau khi ghép mã nguồn.
+## AI-06: Xử lý lỗi tích hợp xác thực (HT-03), chuẩn hóa định tuyến và đồng bộ giao diện
+- **Thời gian:** 20:00 - 21:00 (Thứ 4, Ngày 18/11)
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  > "Kiểm tra và khắc phục các lỗi phát sinh khi ghép code toàn nhóm: trùng lặp route trong routes/web.php, lỗi 500 khi đăng nhập do lệch tên hàm giữa AuthController và AuthService, lỗi 419 Page Expired khi đăng xuất, cập nhật liên kết menu Admin trong header.blade.php và kiểm tra cảnh báo kiểu dữ liệu trong courses/index.blade.php."
+- **Kết quả AI phản hồi & Đánh giá:**
+  > AI đã chỉ ra chính xác dòng route `/courses` bị khai báo trùng ở cuối `routes/web.php`, đồng thời đối chiếu chữ ký hàm giữa `AuthController` và `AuthService` của thành viên phụ trách HT-03 (`register`, `login`, `Auth::logout()`) để sửa triệt để lỗi 500 mà không gây xung đột mã nguồn chung. Ngoài ra, AI giải thích rõ nguyên nhân lỗi `419 Page Expired` do token phiên cũ sau khi `regenerate()` session, cập nhật lại liên kết `/admin/users#courses-section` trên `header.blade.php` và xác nhận tính đồng bộ của `CourseController` với trạng thái khóa học `published`/`public`.
+
+- **Bài học rút ra**: Khi tích hợp mã nguồn từ nhiều thành viên, cần thống nhất chặt chẽ tên phương thức ở tầng Service, rà soát các route khai báo trùng lặp và luôn làm mới phiên/cache (`route:clear`, tải lại trang nhận mã `@csrf` mới) trước khi kiểm thử luồng xác thực.
+
+---
+
+## AI-07: Tổng hợp tiến độ 16 chức năng và xây dựng Kịch bản Demo (Biên bản 04)
+- **Thời gian:** 21:00 - 21:30 (Thứ 4, Ngày 18/11)
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  > "Tổng hợp Biên bản họp nhóm lần 04 đánh giá đầy đủ tình trạng hoàn thành của cả 16 chức năng (HT-01 đến HT-16), phân công nhiệm vụ hoàn thiện cho từng thành viên trước buổi bảo vệ và xây dựng kịch bản Demo chi tiết theo luồng nghiệp vụ thực tế."
+- **Kết quả AI phản hồi & Đánh giá:**
+  > AI đã hệ thống hóa bảng đánh giá đầy đủ 16 chức năng phân theo từng vai trò (Khách vãng lai, Học viên, Giảng viên, Quản trị viên), đồng thời thiết kế kịch bản Demo 7 bước khép kín có tính kiểm chứng chéo giữa các phân hệ (khóa tài khoản tại trang Admin và kiểm tra chặn đăng nhập ngay tại trang Login; duyệt/ẩn khóa học tại Admin và đối chiếu hiển thị tức thì bên trang `/courses`), kèm bảng phân công nhiệm vụ cụ thể cho từng thành viên.
+
+- **Bài học rút ra**: Kịch bản Demo nên xây dựng theo luồng dữ liệu liên thông giữa các vai trò để làm nổi bật tính toàn vẹn CSDL và phân quyền bảo mật middleware, đồng thời cần đối chiếu kỹ bảng phân công để đảm bảo đầy đủ đầu việc của tất cả thành viên.
