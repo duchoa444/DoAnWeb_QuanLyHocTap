@@ -3,6 +3,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EnrollmentController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -53,4 +55,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::get('/courses', function () {
     return view('courses.index');
 });
-    
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])
+        ->name('courses.enroll');
+    Route::get('/my-courses', [EnrollmentController::class, 'myCourses'])
+        ->name('student.courses.index');
+});
