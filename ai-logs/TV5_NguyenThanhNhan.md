@@ -50,3 +50,18 @@
 - **Kiểm tra & Chỉnh sửa của thành viên:**
   - Đã đối chiếu trực tiếp cây thư mục thực tế trên nhánh `develop` (các thư mục con trong `docs/` như `databases/`, `meetings/`, `wireframe/` và các file tài liệu hiện có) để chỉnh sửa mô tả trong `docs/cau-truc-thu-muc.md` khớp 100% với mã nguồn của nhóm.
   - Đã chạy kiểm tra thực tế `git shortlog -sn`, rà soát file trong `ai-logs/` của cả 5 thành viên và kiểm thử toàn bộ luồng cài đặt lại theo `README.md` sau khi merge PR.
+
+  ## AI-05: Xây dựng chức năng HT-04 (Ghi danh & Khóa học của tôi) và rà soát bảo mật
+
+- **Thời gian:** 18/11/2026
+- **Công cụ AI:** Gemini
+- **Nhiệm vụ liên quan:** Lập trình chức năng `HT-04` (ghi danh khóa học công khai tối đa 1 lần/khóa, trang "Khóa học của tôi") trên nhánh `feature/HT-04-ghi-danh` và rà soát lỗi bảo mật cho các PR Sprint 2 (`HT-09`, `HT-14`).
+- **Prompt đã sử dụng:**
+  > "Viết code Laravel 12 cho chức năng HT-04 gồm EnrollmentService (kiểm tra khóa học công khai, chặn ghi danh trùng), EnrollmentController, route web, giao diện Blade trang Khóa học của tôi (chưa hiển thị % tiến độ) và liệt kê checklist rà soát bảo mật cho các chức năng quản lý."
+- **Kết quả AI hỗ trợ:**
+  - Sinh lớp `App\Services\EnrollmentService` xử lý nghiệp vụ kiểm tra trạng thái `published`, kiểm tra trùng lặp `(user_id, course_id)` và truy vấn danh sách khóa học đã ghi danh.
+  - Sinh `EnrollmentController`, khai báo route `POST /courses/{course}/enroll`, `GET /my-courses` và giao diện `resources/views/student/my-courses.blade.php`.
+  - Đề xuất các điểm rà soát bảo mật trọng tâm: chống IDOR khi gọi trực tiếp route ghi danh/sửa khóa học, chống Mass Assignment, kiểm tra `@csrf`, XSS (`{{ }}`) và validate file upload.
+- **Kiểm tra & Chỉnh sửa của thành viên:**
+  - Đã đối chiếu tên cột (`status`, `user_id`, `course_id`, `enrolled_at`), tên quan hệ Eloquent (`enrollments`, `teacher`) và tên route (`courses.show`, `layouts.app`) cho khớp với migration và layout thực tế của nhóm.
+  - Đã kiểm thử thực tế trên trình duyệt: ghi danh thành công khóa công khai, bị chặn khi bấm ghi danh lần 2 và hiển thị đúng danh sách tại trang "Khóa học của tôi".
