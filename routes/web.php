@@ -19,6 +19,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 
 // Danh sách khóa học công khai (HT-01)
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+// Chi tiết khóa học công khai (HT-02)
+Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
 
 // Phân hệ Học viên (student) - HT-03, HT-06
 Route::middleware(['auth', 'role:student'])->group(function () {
