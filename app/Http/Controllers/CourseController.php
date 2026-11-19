@@ -40,4 +40,24 @@ class CourseController extends Controller
 
         return view('courses.index', compact('courses', 'categories', 'teachers'));
     }
+    public function show(Course $course)
+{
+        abort_unless(in_array($course->status, ['published', 'public']), 404);
+        $course->load(['category', 'teacher', 'lessons']);
+
+      $hasEnrollmentsTable = \Illuminate\Support\Facades\Schema::hasTable('enrollments');
+
+        $enrollmentsCount = $hasEnrollmentsTable
+            ? \Illuminate\Support\Facades\DB::table('enrollments')->where('course_id', $course->id)->count()
+            : 0;
+    $isEnrolled = false;
+        if (auth()->check() && $hasEnrollmentsTable) {
+            $isEnrolled = \Illuminate\Support\Facades\DB::table('enrollments')
+                ->where('course_id', $course->id)
+                ->where('user_id', auth()->id())
+                ->exists();
+        }
+
+    return view('courses.show', compact('course', 'isEnrolled', 'enrollmentsCount'));
+}
 }
