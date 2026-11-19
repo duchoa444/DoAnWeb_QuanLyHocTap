@@ -75,3 +75,22 @@ NHẬT KÝ SỬ DỤNG AI - NGUYỄN HOÀNG ANH VŨ (TV1 - LE)
   > AI đã hệ thống hóa bảng đánh giá đầy đủ 16 chức năng phân theo từng vai trò (Khách vãng lai, Học viên, Giảng viên, Quản trị viên), đồng thời thiết kế kịch bản Demo 7 bước khép kín có tính kiểm chứng chéo giữa các phân hệ (khóa tài khoản tại trang Admin và kiểm tra chặn đăng nhập ngay tại trang Login; duyệt/ẩn khóa học tại Admin và đối chiếu hiển thị tức thì bên trang `/courses`), kèm bảng phân công nhiệm vụ cụ thể cho từng thành viên.
 
 - **Bài học rút ra**: Kịch bản Demo nên xây dựng theo luồng dữ liệu liên thông giữa các vai trò để làm nổi bật tính toàn vẹn CSDL và phân quyền bảo mật middleware, đồng thời cần đối chiếu kỹ bảng phân công để đảm bảo đầy đủ đầu việc của tất cả thành viên.
+## AI-08: Triển khai và gỡ lỗi chức năng Hồ sơ cá nhân & Kết quả học tập (HT-07)
+- **Thời gian:** 21:30 - 22:30 (Thứ 5, Ngày 19/11)
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  > "Xây dựng chức năng Hồ sơ cá nhân và Kết quả học tập (HT-07) theo kiến trúc 3 lớp (Controller - Service - Repository) cho phép sửa thông tin, đổi mật khẩu và xem lịch sử điểm thi; đồng thời khắc phục lỗi thiếu Model QuizAttempt, lỗi 404 tại /profile, lỗi thiếu view layouts.app và gắn liên kết trang hồ sơ vào tên người dùng trên thanh điều hướng."
+- **Kết quả AI phản hồi & Đánh giá:**
+  > AI đã cung cấp đầy đủ mã nguồn cho `StudentProfileController`, `StudentProfileService`, `StudentProfileRepository` và giao diện `student/profile.blade.php` tích hợp cập nhật thông tin cá nhân, đổi mật khẩu băm chuẩn Bcrypt và bảng lịch sử làm bài trắc nghiệm. Khi đối chiếu cấu trúc bảng `quiz_attempts` thực tế trong CSDL `doan_quanlyhoctap` (liên kết trực tiếp qua `course_id` thay vì bảng trung gian `quizzes`), AI đã điều chỉnh lại Model `QuizAttempt` và truy vấn Eloquent cho khớp đúng các cột dữ liệu. Ngoài ra, AI hỗ trợ xử lý dứt điểm lỗi `404 Not Found` do đặt nhầm route `/profile` vào trong nhóm tiền tố `admin`, bổ sung layout `layouts/app.blade.php` và gắn liên kết chuyển hướng `/profile` vào tên tài khoản ngay cạnh nút Đăng xuất.
+- **Bài học rút ra:** Cần kiểm tra cấu trúc bảng và khóa ngoại thực tế trong CSDL trước khi định nghĩa quan hệ Model, đồng thời rà soát kỹ phạm vi nhóm `prefix` và `middleware` trong `routes/web.php` khi tích hợp route của nhiều vai trò.
+
+---
+
+## AI-09: Hoàn thiện luồng Ghi danh, Khóa học của tôi và điều hướng vào bài giảng (HT-04)
+- **Thời gian:** 22:35 - 23:20 (Thứ 5, Ngày 19/11)
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  > "Khắc phục lỗi MethodNotAllowedHttpException (POST /courses/2) khi bấm nút ghi danh chuyển tiếp sang học bài giảng (HT-04) trên trang chi tiết khóa học, bổ sung xử lý lưu ghi danh vào bảng enrollments và hoàn thiện trang Khóa học của tôi (/my-courses) để học viên truy cập vào học."
+- **Kết quả AI phản hồi & Đánh giá:**
+  > AI đã xác định đúng nguyên nhân lỗi `Method Not Allowed` xuất phát từ việc thiếu route `courses.enroll` khiến thuộc tính `action` của biểu mẫu trên `courses/show.blade.php` bị gán thành `#`, từ đó bổ sung định tuyến `POST /courses/{course}/enroll` và phương thức `enroll()` trong `CourseController` (có kiểm tra chống ghi danh trùng lặp và cập nhật sĩ số học viên). Tiếp đó, AI hỗ trợ xử lý lỗi `404 Not Found` tại `/my-courses` bằng cách bổ sung phương thức `myCourses()` truy vấn bảng `enrollments` cùng giao diện `courses/my-courses.blade.php` đồng bộ header/footer của nhóm, giúp học viên chuyển mạch liền mạch từ danh sách khóa học đã đăng ký sang trang học bài giảng (`HT-04`).
+- **Bài học rút ra:** Khi sử dụng điều kiện `Route::has(...)` trên giao diện Blade, cần đảm bảo toàn bộ tên route liên kết giữa các phân hệ (ghi danh, danh sách khóa học cá nhân, vào học) đã được khai báo đầy đủ trong `routes/web.php` và làm mới bộ nhớ đệm định tuyến (`php artisan route:clear`).
