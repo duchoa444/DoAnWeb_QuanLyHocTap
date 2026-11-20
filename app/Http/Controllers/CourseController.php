@@ -145,3 +145,126 @@ class CourseController extends Controller
         ));
     }
 }
+public function learn(Course $course, $lessonId = null)
+    {
+        abort_unless(in_array($course->status, ['published', 'public']), 404);
+
+        $userId = auth()->id();
+
+        // 1. Kiểm tra quyền truy cập ở server (HT-NFR2): chỉ học viên đã ghi danh (hoặc GV sở hữu / admin) mới được vào
+        $isEnrolled = \Illuminate\Support\Facades\Schema::hasTable('enrollments')
+            && \Illuminate\Support\Facades\DB::table('enrollments')
+                ->where('course_id', $course->id)
+                ->where('user_id', $userId)
+                ->exists();
+
+        $isOwnerOrAdmin = ($course->teacher_id === $userId) || (auth()->user()->role === 'admin');
+
+        if (!$isEnrolled && !$isOwnerOrAdmin) {
+            return redirect()
+                ->route('courses.show', $course->id)
+                ->with('error', 'Bạn cần ghi danh khóa học trước khi vào học.');
+        }
+
+        // 2. Lấy danh sách bài học của khóa
+        $course->load(['category', 'teacher', 'lessons']);
+        $lessons = $course->lessons;
+
+        if ($lessons->isEmpty()) {
+            return redirect()
+                ->route('courses.show', $course->id)
+                ->with('error', 'Khóa học này hiện chưa có bài học nào.');
+        }
+
+        // 3. Xác định bài học đang xem (mặc định là bài đầu tiên nếu chưa chọn)
+        $currentLesson = $lessonId
+            ? $lessons->firstWhere('id', (int) $lessonId)
+            : $lessons->first();
+
+        abort_unless($currentLesson !== null, 404);
+
+        // 4. Tính bài trước / bài sau
+        $currentIndex = $lessons->search(fn ($item) => $item->id === $currentLesson->id);
+        $prevLesson = $currentIndex > 0 ? $lessons[$currentIndex - 1] : null;
+        $nextLesson = ($currentIndex !== false && $currentIndex < $lessons->count() - 1)
+            ? $lessons[$currentIndex + 1]
+            : null;
+
+        // 5. Lấy danh sách ID các bài học viên đã hoàn thành từ bảng lesson_progress
+        $completedLessonIds = [];
+        if (\Illuminate\Support\Facades\Schema::hasTable('lesson_progress')) {
+            $progressQuery = \Illuminate\Support\Facades\DB::table('lesson_progress')
+                ->where('user_id', $userId)
+                ->whereIn('lesson_id', $lessons->pluck('id'));
+
+            if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'is_completed')) {
+                $progressQuery->where('is_completed', true);
+            }
+
+            $completedLessonIds = $progressQuery->pluck('lesson_id')->toArray();
+        }
+
+        return view('courses.learn', compact(
+            'course',
+            'lessons',
+            'currentLesson',
+            'prevLesson',
+            'nextLesson',
+            'completedLessonIds'
+        ));
+    }
+
+    public function completeLesson(Course $course, $lessonId)
+    {
+        $userId = auth()->id();
+
+        // Kiểm tra quyền ghi danh ở server (HT-NFR2)
+        $isEnrolled = \Illuminate\Support\Facades\Schema::hasTable('enrollments')
+            && \Illuminate\Support\Facades\DB::table('enrollments')
+                ->where('course_id', $course->id)
+                ->where('user_id', $userId)
+                ->exists();
+
+      $isOwnerOrAdmin = ($course->teacher_id === $userId) || (auth()->user()->role === 'admin');
+        if (!$isEnrolled && !$isOwnerOrAdmin) {
+                abort(403, 'Bạn chưa ghi danh khóa học này.');
+        }
+
+        // Đảm bảo bài học thuộc đúng khóa học
+        $lesson = $course->lessons()->where('id', (int) $lessonId)->firstOrFail();
+
+        // Ghi vào bảng lesson_progress (chống trùng lặp)
+        if (\Illuminate\Support\Facades\Schema::hasTable('lesson_progress')) {
+            $exists = \Illuminate\Support\Facades\DB::table('lesson_progress')
+                ->where('user_id', $userId)
+                ->where('lesson_id', $lesson->id)
+                ->exists();
+
+            if (!$exists) {
+                $data = [
+                    'user_id' => $userId,
+                    'lesson_id' => $lesson->id,
+                ];
+
+                if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'is_completed')) {
+                    $data['is_completed'] = true;
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'completed_at')) {
+                    $data['completed_at'] = now();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'created_at')) {
+                    $data['created_at'] = now();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'updated_at')) {
+                    $data['updated_at'] = now();
+                }
+
+                \Illuminate\Support\Facades\DB::table('lesson_progress')->insert($data);
+            }
+        }
+
+        return redirect()
+            ->route('courses.learn', [$course->id, $lesson->id])
+            ->with('success', 'Đã đánh dấu hoàn thành bài học!');
+    }
+}
