@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@include('header')
 
 @section('content')
 <div class="max-w-5xl mx-auto py-8 px-4">
@@ -113,4 +113,4 @@
         @endforelse
     </div>
 </div>
-@endsection
+@include('footer')

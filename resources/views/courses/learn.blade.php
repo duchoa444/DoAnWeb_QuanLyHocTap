@@ -131,5 +131,23 @@
         </div>
     </div>
 </div>
+@php
+    $totalLessons = $lessons->count();
+    $completedCount = count($completedLessonIds ?? []);
+    $canTakeQuiz = $totalLessons > 0 && $completedCount >= $totalLessons;
+@endphp
 
+@if($canTakeQuiz)
+    <form action="{{ route('quiz.start', $course->id) }}" method="POST" style="display: inline;">
+        @csrf
+        <button type="submit" style="padding: 10px 18px; background: #28a745; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            Làm bài trắc nghiệm
+        </button>
+    </form>
+@else
+    <button type="button" disabled
+            style="padding: 10px 18px; background: #ccc; color: #666; border: none; border-radius: 4px; cursor: not-allowed; font-weight: bold;">
+        Làm bài trắc nghiệm (Hoàn thành {{ $completedCount }}/{{ $totalLessons }} bài để mở khóa)
+    </button>
+@endif
 @include('footer')

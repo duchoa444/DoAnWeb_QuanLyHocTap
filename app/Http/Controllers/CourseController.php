@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CourseController extends Controller
 {
-    // Danh sách khóa học công khai
+    // Danh sách khóa học công khai (HT-01)
     public function index(Request $request): View
     {
         $categories = Category::orderBy('name')->get();
@@ -56,7 +56,7 @@ class CourseController extends Controller
         ));
     }
 
-    // Chi tiết khóa học
+    // Chi tiết khóa học (HT-02)
     public function show(Course $course): View
     {
         abort_unless(
@@ -92,7 +92,7 @@ class CourseController extends Controller
         ));
     }
 
-    // Ghi danh khóa học
+    // Ghi danh khóa học (HT-04)
     public function enroll(Course $course)
     {
         $userId = auth()->id();
@@ -144,16 +144,17 @@ class CourseController extends Controller
             'enrollments'
         ));
     }
-}
-public function learn(Course $course, $lessonId = null)
+
+    // Vào học bài giảng (HT-05)
+    public function learn(Course $course, $lessonId = null)
     {
         abort_unless(in_array($course->status, ['published', 'public']), 404);
 
         $userId = auth()->id();
 
-        // 1. Kiểm tra quyền truy cập ở server (HT-NFR2): chỉ học viên đã ghi danh (hoặc GV sở hữu / admin) mới được vào
-        $isEnrolled = \Illuminate\Support\Facades\Schema::hasTable('enrollments')
-            && \Illuminate\Support\Facades\DB::table('enrollments')
+        // 1. Kiểm tra quyền truy cập ở server (HT-NFR2)
+        $isEnrolled = Schema::hasTable('enrollments')
+            && DB::table('enrollments')
                 ->where('course_id', $course->id)
                 ->where('user_id', $userId)
                 ->exists();
@@ -192,12 +193,12 @@ public function learn(Course $course, $lessonId = null)
 
         // 5. Lấy danh sách ID các bài học viên đã hoàn thành từ bảng lesson_progress
         $completedLessonIds = [];
-        if (\Illuminate\Support\Facades\Schema::hasTable('lesson_progress')) {
-            $progressQuery = \Illuminate\Support\Facades\DB::table('lesson_progress')
+        if (Schema::hasTable('lesson_progress')) {
+            $progressQuery = DB::table('lesson_progress')
                 ->where('user_id', $userId)
                 ->whereIn('lesson_id', $lessons->pluck('id'));
 
-            if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'is_completed')) {
+            if (Schema::hasColumn('lesson_progress', 'is_completed')) {
                 $progressQuery->where('is_completed', true);
             }
 
@@ -214,28 +215,29 @@ public function learn(Course $course, $lessonId = null)
         ));
     }
 
+    // Đánh dấu hoàn thành bài học (HT-05)
     public function completeLesson(Course $course, $lessonId)
     {
         $userId = auth()->id();
 
         // Kiểm tra quyền ghi danh ở server (HT-NFR2)
-        $isEnrolled = \Illuminate\Support\Facades\Schema::hasTable('enrollments')
-            && \Illuminate\Support\Facades\DB::table('enrollments')
+        $isEnrolled = Schema::hasTable('enrollments')
+            && DB::table('enrollments')
                 ->where('course_id', $course->id)
                 ->where('user_id', $userId)
                 ->exists();
 
-      $isOwnerOrAdmin = ($course->teacher_id === $userId) || (auth()->user()->role === 'admin');
+        $isOwnerOrAdmin = ($course->teacher_id === $userId) || (auth()->user()->role === 'admin');
         if (!$isEnrolled && !$isOwnerOrAdmin) {
-                abort(403, 'Bạn chưa ghi danh khóa học này.');
+            abort(403, 'Bạn chưa ghi danh khóa học này.');
         }
 
         // Đảm bảo bài học thuộc đúng khóa học
         $lesson = $course->lessons()->where('id', (int) $lessonId)->firstOrFail();
 
         // Ghi vào bảng lesson_progress (chống trùng lặp)
-        if (\Illuminate\Support\Facades\Schema::hasTable('lesson_progress')) {
-            $exists = \Illuminate\Support\Facades\DB::table('lesson_progress')
+        if (Schema::hasTable('lesson_progress')) {
+            $exists = DB::table('lesson_progress')
                 ->where('user_id', $userId)
                 ->where('lesson_id', $lesson->id)
                 ->exists();
@@ -246,20 +248,20 @@ public function learn(Course $course, $lessonId = null)
                     'lesson_id' => $lesson->id,
                 ];
 
-                if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'is_completed')) {
+                if (Schema::hasColumn('lesson_progress', 'is_completed')) {
                     $data['is_completed'] = true;
                 }
-                if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'completed_at')) {
+                if (Schema::hasColumn('lesson_progress', 'completed_at')) {
                     $data['completed_at'] = now();
                 }
-                if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'created_at')) {
+                if (Schema::hasColumn('lesson_progress', 'created_at')) {
                     $data['created_at'] = now();
                 }
-                if (\Illuminate\Support\Facades\Schema::hasColumn('lesson_progress', 'updated_at')) {
+                if (Schema::hasColumn('lesson_progress', 'updated_at')) {
                     $data['updated_at'] = now();
                 }
 
-                \Illuminate\Support\Facades\DB::table('lesson_progress')->insert($data);
+                DB::table('lesson_progress')->insert($data);
             }
         }
 

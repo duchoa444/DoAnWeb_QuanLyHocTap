@@ -1,28 +1,57 @@
-@extends('layouts.app')
+@include('header')
 
-@section('content')
-<div class="max-w-6xl mx-auto py-8 px-4">
-    <h1 class="text-2xl font-bold mb-6">Khóa học của tôi</h1>
+<div style="padding: 20px; max-width: 1100px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #333;">Khóa học của tôi ({{ $courses->count() }})</h2>
+        <a href="{{ route('courses.index') }}" style="padding: 8px 14px; border: 1px solid #007bff; color: #007bff; text-decoration: none; border-radius: 4px; font-size: 14px;">
+            + Khám phá thêm khóa học
+        </a>
+    </div>
 
-    @if (session('success'))
-        <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('success') }}</div>
-    @endif
-
-    @if ($courses->isEmpty())
-        <p class="text-gray-600">Bạn chưa ghi danh khóa học nào.</p>
+    @if($courses->isEmpty())
+        <div style="background: #fff; padding: 40px 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+            <p style="color: #666; font-size: 16px; margin-bottom: 16px;">Bạn chưa ghi danh khóa học nào.</p>
+            <a href="{{ route('courses.index') }}" style="display: inline-block; padding: 10px 20px; background: #007bff; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                Xem danh sách khóa học
+            </a>
+        </div>
     @else
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            @foreach ($courses as $course)
-                <div class="border rounded-lg p-4 shadow-sm bg-white">
-                    <h2 class="text-lg font-semibold">{{ $course->title }}</h2>
-                    <p class="text-sm text-gray-500 mt-1">
-                        Giảng viên: {{ $course->teacher->name ?? 'N/A' }}
-                    </p>
-                    <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $course->description }}</p>
-                    <div class="mt-4">
-                        <a href="{{ route('courses.show', $course->id) }}"
-                           class="inline-block px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px;">
+            @foreach($courses as $course)
+                @php
+                    $enrolledAt = $enrollments[$course->id]->created_at ?? null;
+                @endphp
+                <div style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <span style="display: inline-block; padding: 3px 10px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 12px; margin-bottom: 10px;">
+                            {{ $course->category->name ?? 'Chưa phân loại' }}
+                        </span>
+
+                        <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #222;">
+                            {{ $course->title }}
+                        </h3>
+
+                        <p style="margin: 0 0 6px 0; font-size: 14px; color: #555;">
+                            <strong>Giảng viên:</strong> {{ $course->teacher->name ?? 'Đang cập nhật' }}
+                        </p>
+                        <p style="margin: 0 0 6px 0; font-size: 14px; color: #555;">
+                            <strong>Số bài học:</strong> {{ $course->lessons_count }} bài
+                        </p>
+                        @if($enrolledAt)
+                            <p style="margin: 0 0 16px 0; font-size: 13px; color: #888;">
+                                Ghi danh ngày: {{ \Carbon\Carbon::parse($enrolledAt)->format('d/m/Y') }}
+                            </p>
+                        @endif
+                    </div>
+
+                    <div style="display: flex; gap: 10px; padding-top: 12px; border-top: 1px solid #eee;">
+                        <a href="{{ Route::has('courses.learn') ? route('courses.learn', $course->id) : route('courses.show', $course->id) }}"
+                           style="flex: 1; text-align: center; padding: 9px 14px; background: #28a745; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">
                             Vào học
+                        </a>
+                        <a href="{{ route('courses.show', $course->id) }}"
+                           style="padding: 9px 12px; border: 1px solid #ccc; color: #333; text-decoration: none; border-radius: 4px; font-size: 14px;">
+                            Chi tiết
                         </a>
                     </div>
                 </div>
@@ -30,4 +59,5 @@
         </div>
     @endif
 </div>
-@endsection
+
+@include('footer')
