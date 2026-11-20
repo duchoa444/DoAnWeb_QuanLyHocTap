@@ -50,3 +50,33 @@
 - **Kiểm tra & Chỉnh sửa của thành viên:**
   - Đã đối chiếu trực tiếp cây thư mục thực tế trên nhánh `develop` (các thư mục con trong `docs/` như `databases/`, `meetings/`, `wireframe/` và các file tài liệu hiện có) để chỉnh sửa mô tả trong `docs/cau-truc-thu-muc.md` khớp 100% với mã nguồn của nhóm.
   - Đã chạy kiểm tra thực tế `git shortlog -sn`, rà soát file trong `ai-logs/` của cả 5 thành viên và kiểm thử toàn bộ luồng cài đặt lại theo `README.md` sau khi merge PR.
+
+  ## AI-05: Xây dựng chức năng HT-04 (Ghi danh & Khóa học của tôi) và rà soát bảo mật
+
+- **Thời gian:** 18/11/2026
+- **Công cụ AI:** Gemini
+- **Nhiệm vụ liên quan:** Lập trình chức năng `HT-04` (ghi danh khóa học công khai tối đa 1 lần/khóa, trang "Khóa học của tôi") trên nhánh `feature/HT-04-ghi-danh` và rà soát lỗi bảo mật cho các PR Sprint 2 (`HT-09`, `HT-14`).
+- **Prompt đã sử dụng:**
+  > "Viết code Laravel 12 cho chức năng HT-04 gồm EnrollmentService (kiểm tra khóa học công khai, chặn ghi danh trùng), EnrollmentController, route web, giao diện Blade trang Khóa học của tôi (chưa hiển thị % tiến độ) và liệt kê checklist rà soát bảo mật cho các chức năng quản lý."
+- **Kết quả AI hỗ trợ:**
+  - Sinh lớp `App\Services\EnrollmentService` xử lý nghiệp vụ kiểm tra trạng thái `published`, kiểm tra trùng lặp `(user_id, course_id)` và truy vấn danh sách khóa học đã ghi danh.
+  - Sinh `EnrollmentController`, khai báo route `POST /courses/{course}/enroll`, `GET /my-courses` và giao diện `resources/views/student/my-courses.blade.php`.
+  - Đề xuất các điểm rà soát bảo mật trọng tâm: chống IDOR khi gọi trực tiếp route ghi danh/sửa khóa học, chống Mass Assignment, kiểm tra `@csrf`, XSS (`{{ }}`) và validate file upload.
+- **Kiểm tra & Chỉnh sửa của thành viên:**
+  - Đã đối chiếu tên cột (`status`, `user_id`, `course_id`, `enrolled_at`), tên quan hệ Eloquent (`enrollments`, `teacher`) và tên route (`courses.show`, `layouts.app`) cho khớp với migration và layout thực tế của nhóm.
+  - Đã kiểm thử thực tế trên trình duyệt: ghi danh thành công khóa công khai, bị chặn khi bấm ghi danh lần 2 và hiển thị đúng danh sách tại trang "Khóa học của tôi".
+
+## AI-06: Xây dựng chức năng HT-11 (CRUD câu hỏi trắc nghiệm và thời gian làm bài)
+
+- **Thời gian:** 19/11/2026
+- **Công cụ AI:** Gemini
+- **Nhiệm vụ liên quan:** Lập trình chức năng `HT-11` (thêm, sửa, xóa câu hỏi trắc nghiệm 4 lựa chọn, cài đặt thời gian làm bài tính bằng phút và kiểm tra quyền sở hữu khóa học) trên nhánh `feature/HT-11-cau-hoi`.
+- **Prompt đã sử dụng:**
+  > "Viết code Laravel 12 cho chức năng HT-11 gồm QuestionController (CRUD câu hỏi 4 đáp án A/B/C/D với 1 đáp án đúng, cập nhật thời gian làm bài theo phút, kiểm tra chủ sở hữu khóa học ở server), khai báo route và tạo giao diện Blade quản lý câu hỏi cho giảng viên."
+- **Kết quả AI hỗ trợ:**
+  - Sinh lớp `App\Http\Controllers\Teacher\QuestionController` với hàm `authorizeCourseOwner()` chặn giảng viên chỉnh sửa câu hỏi của khóa học không thuộc quyền sở hữu (trả về lỗi 403).
+  - Sinh logic validate tiếng Việt cho dữ liệu câu hỏi (`content`, `option_a`–`option_d`, `correct_option` thuộc `A,B,C,D`) và thời gian làm bài (`quiz_minutes`).
+  - Tạo giao diện `resources/views/teacher/questions/index.blade.php` tích hợp form chỉnh thời gian làm bài, form thêm câu hỏi mới và danh sách câu hỏi kèm nút xóa.
+- **Kiểm tra & Chỉnh sửa của thành viên:**
+  - Đã đối chiếu tên cột khóa ngoại chủ sở hữu (`teacher_id` / `user_id`), cột thời gian làm bài (`quiz_minutes`) và tên các cột đáp án trong `database/migrations/` của nhóm để khớp với CSDL thực tế.
+  - Đã kiểm thử thực tế trên trình duyệt: thêm/xóa câu hỏi, lưu số phút làm bài thành công và thử truy cập URL khóa học của giảng viên khác để xác nhận hệ thống chặn lỗi 403.

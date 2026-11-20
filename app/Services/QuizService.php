@@ -186,4 +186,45 @@ class QuizService
             ];
         });
     }
+    /**
+     * Lấy chi tiết kết quả & đáp án đúng SAU KHI ĐÃ NỘP BÀI (HT-06, HT-NFR1)
+     */
+    public function getResult(int $attemptId, int $userId): array
+    {
+        $attempt = DB::table('quiz_attempts')->where('id', $attemptId)->first();
+        if (!$attempt) {
+            throw new Exception('Không tìm thấy lượt làm bài.', 404);
+        }
+
+        if ((int) $attempt->user_id !== $userId) {
+            throw new Exception('Bạn không có quyền xem kết quả lượt làm bài này.', 403);
+        }
+
+        if ($attempt->submitted_at === null) {
+            throw new Exception('Bạn cần nộp bài trước khi xem đáp án và kết quả.', 403);
+        }
+
+        $course = DB::table('courses')->where('id', $attempt->course_id)->first();
+        $questions = DB::table('questions')->where('course_id', $attempt->course_id)->get();
+
+        $usedAttempts = DB::table('quiz_attempts')
+            ->where('user_id', $userId)
+            ->where('course_id', $attempt->course_id)
+            ->count();
+
+        $bestScore = DB::table('quiz_attempts')
+            ->where('user_id', $userId)
+            ->where('course_id', $attempt->course_id)
+            ->whereNotNull('submitted_at')
+            ->max('score');
+
+        return [
+            'course'             => $course,
+            'attempt'            => $attempt,
+            'questions'          => $questions, // Chỉ trả correct_option khi submitted_at != null
+            'used_attempts'      => $usedAttempts,
+            'remaining_attempts' => max(0, 3 - $usedAttempts),
+            'best_score'         => $bestScore,
+        ];
+    }
 }
