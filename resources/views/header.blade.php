@@ -51,7 +51,10 @@
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         @auth
             <span style="font-size: 14px; color: #555;">
-                Xin chào, <strong>{{ auth()->user()->name }}</strong>
+                Xin chào, 
+                <a href="{{ url('/profile') }}" title="Hồ sơ cá nhân" style="color: #007bff; text-decoration: none; font-weight: bold;">
+                    {{ auth()->user()->name }}
+                </a>
             </span>
             <form action="{{ url('/logout') }}" method="POST" style="margin: 0;">
                 @csrf
@@ -79,3 +82,4 @@
             {{ session('error') }}
         </div>
     @endif
+    </div></body></html>    
