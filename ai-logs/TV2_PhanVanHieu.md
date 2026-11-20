@@ -74,3 +74,14 @@
   - Tự kiểm tra schema migration thực tế của nhóm (`categories`, `courses` dùng khóa ngoại `category_id` và `teacher_id`) để điều chỉnh hàm `seedQuizData()` trong file test khớp 100% với cấu trúc bảng.
   - Tự viết thêm **test case thứ 3** (`test_bo_trong_cau_va_dap_an_khong_hop_le`): kiểm chứng trường hợp học viên bỏ trống câu hỏi hoặc gửi ký tự đáp án không hợp lệ (`'Z'`, `''`) thì hệ thống không báo lỗi mà tính câu đó sai (`1/4` câu đúng $rightarrow$ `2.5` điểm).
   - Xử lý lỗi cú pháp ký tự thoát (`\$`) phát sinh khi sao chép mã nguồn và chạy xác nhận **`3 passed (7 assertions)`** trên PHPUnit.
+
+  ### Ngày 9: Kiểm chứng bảo mật bài thi (`HT-NFR1`) & Rà soát tích hợp Mốc 2
+- **Mục tiêu:** Kiểm chứng toàn diện các quy tắc chống gian lận của module Trắc nghiệm (`HT-NFR1`, `HT-06`) và hỗ trợ review PR `HT-07` trước hạn chốt Mốc 2 (21:00).
+- **Nội dung hỗ trợ từ AI:**
+  - Lập kịch bản kiểm thử lỗ hổng bảo mật phía Client/Network: kiểm tra payload phản hồi trên DevTools Network, giả lập chỉnh lùi đồng hồ hệ thống để qua mặt bộ đếm giờ JavaScript, và gửi request vượt quá 3 lượt thi.
+  - Rà soát an toàn kiểu dữ liệu đầu vào (`answers[]`) trong `QuizController` nhằm ngăn chặn lỗi ngoại lệ khi kẻ xấu chỉnh sửa tham số request.
+- **Kiểm chứng & Chỉnh sửa thủ công:**
+  - Trực tiếp mở tab Network trên trình duyệt khi làm bài `/courses/{id}/quiz`: xác nhận response HTML không chứa trường `correct_option` trước khi nộp bài (`HT-NFR1` đạt).
+  - Thử chỉnh lùi đồng hồ Windows 30 phút và nộp bài sau thời hạn thực tế của đề: xác nhận Server từ chối nộp bài thành công.
+  - Thử mở lượt làm bài thứ 4: xác nhận hệ thống chặn đúng quy định tối đa 3 lượt.
+  - Tham gia review code PR `feature/HT-07-ho-so` (truy vấn lịch sử điểm từ `quiz_attempts`).
