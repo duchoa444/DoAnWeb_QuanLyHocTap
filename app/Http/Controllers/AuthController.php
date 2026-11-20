@@ -50,8 +50,8 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->route('courses.index')
-            ->with('success', 'Đăng nhập thành công!');
+        return redirect()->route('teacher.courses.index')
+    ->with('success', 'Đăng nhập thành công!');
     }
 
     // Đăng xuất
