@@ -49,3 +49,18 @@
   - **Gợi ý loại bỏ:** Xóa bỏ hoàn toàn khối `@php $courses = [...]; @endphp` dùng dữ liệu cứng ở Ngày 3 và loại bỏ route `GET /courses` cũ trả về view tĩnh bị trùng lặp trong `routes/web.php`.
 - **Kiểm chứng & Trạng thái:** Đã chạy `php artisan migrate:fresh --seed`, kiểm thử hiển thị dữ liệu thật thành công trên đường dẫn `/courses` và commit lên nhánh `feature/HT-01-khoa-hoc`.
 - **Bài học rút ra:** Luôn kiểm tra kỹ tên cột trạng thái (`status` / `is_published`) và quan hệ Model (`teacher` / `user`) trong migration trước khi viết truy vấn Eloquent để tránh lỗi sai tên cột hoặc quan hệ.
+## AI-06: Thiết kế giao diện học bài 2 cột và xử lý phân quyền truy cập (`HT-05`, `HT-NFR2`)
+
+- *Thời gian:* 14:00 – 15:30 (Thứ 5, Ngày 09 – Tuần 2)
+- *Công cụ AI:* Gemini
+- *Prompt:* "Viết Controller và Blade view 2 cột cho chức năng Học bài (HT-05) trong Laravel: cột trái hiển thị danh sách bài học của khóa học kèm trạng thái hoàn thành, cột phải hiển thị nội dung bài học hiện tại và nút điều hướng Bài trước / Bài sau. Bổ sung kiểm tra quyền truy cập (HT-NFR2) chỉ cho phép học viên đã ghi danh, giảng viên sở hữu khóa học hoặc admin vào xem."
+- *Kết quả AI phản hồi & Đánh giá:* AI đã cung cấp đầy đủ logic query Eager Loading danh sách bài học (`lessons`), xác định bài học đang chọn, điều hướng bài trước/sau (`prevLesson`, `nextLesson`) và chặn truy cập trái phép bằng cách kiểm tra bảng `enrollments` trước khi render giao diện.
+- *Bài học rút ra:* Luôn kiểm tra quyền ghi danh ở tầng Backend (`CourseController@learn`) thay vì chỉ ẩn nút ở giao diện để đảm bảo học viên chưa đăng ký khóa học không thể truy cập trực tiếp qua đường dẫn URL `/courses/{course}/learn`.
+
+## AI-07: Xây dựng chức năng đánh dấu hoàn thành bài học không lưu trùng & Kiểm thử tích hợp
+
+- *Thời gian:* 09:00 – 10:30 (Thứ 6, Ngày 10 – Tuần 2)
+- *Công cụ AI:* Gemini
+- *Prompt:* "Hướng dẫn viết xử lý POST đánh dấu hoàn thành bài học vào bảng `lesson_progress` bằng Laravel sao cho không bị lưu trùng dữ liệu khi người dùng bấm nhiều lần, đồng thời hỗ trợ kịch bản kiểm thử tích hợp luồng Ghi danh -> Vào học -> Đánh dấu hoàn thành."
+- *Kết quả AI phản hồi & Đánh giá:* AI đề xuất sử dụng `firstOrCreate()` kết hợp ràng buộc duy nhất `UNIQUE(user_id, lesson_id)` trong database để đảm bảo mỗi bài học chỉ được ghi nhận hoàn thành đúng 1 lần, đồng thời cập nhật chính xác bộ đếm tiến độ học tập (`số bài hoàn thành / tổng số bài`) trên giao diện.
+- *Bài học rút ra:* Khi phát triển tính năng theo từng nhánh Git độc lập (`feature/HT-05-hoc-bai`) trước khi merge với nhánh ghi danh của thành viên khác, cần tách bạch rõ phần code kiểm thử tạm thời và dọn sạch các route phụ trợ trước khi `git push` để tránh xung đột mã nguồn.
