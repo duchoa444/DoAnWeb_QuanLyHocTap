@@ -43,4 +43,5 @@ class CourseController extends Controller
 
         return back()->with('success', 'Đã ẩn khóa học vi phạm "' . $course->title . '" khỏi trang công khai.');
     }
+    
 }

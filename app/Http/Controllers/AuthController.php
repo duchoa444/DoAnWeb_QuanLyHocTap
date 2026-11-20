@@ -55,6 +55,7 @@ class AuthController extends Controller
     }
 
     // Đăng xuất
+    // Đăng xuất
     public function logout(Request $request)
     {
         Auth::logout();
