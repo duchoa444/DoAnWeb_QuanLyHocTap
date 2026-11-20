@@ -4,7 +4,7 @@
     <a href="{{ route('courses.index') }}" style="display: inline-block; margin-bottom: 16px; color: #007bff; text-decoration: none;">
         &larr; Quay lại danh sách khóa học
     </a>
-
+   
     <div style="background: #fff; padding: 24px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 24px;">
         <span style="display: inline-block; padding: 4px 10px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 13px; margin-bottom: 10px;">
             {{ $course->category->name ?? 'Chưa phân loại' }}
@@ -18,25 +18,35 @@
 
         <div style="display: flex; gap: 24px; flex-wrap: wrap; color: #444; font-size: 14px; margin-bottom: 20px; padding-top: 12px; border-top: 1px solid #eee;">
             <div><strong>Giảng viên:</strong> {{ $course->teacher->name ?? 'Đang cập nhật' }}</div>
-            <div><strong>Học viên tham gia:</strong> {{ $course->enrollments_count ?? 0 }} học viên</div>
+            <div><strong>Học viên tham gia:</strong> {{ $enrollmentsCount ?? $course->enrollments_count ?? 0 }} học viên</div>
             <div><strong>Số bài học:</strong> {{ $course->lessons->count() }} bài</div>
         </div>
 
         {{-- Đã ghi danh -> Vào học | Chưa ghi danh -> Ghi danh (gọi HT-04) --}}
-        @if($isEnrolled)
-            <a href="{{ Route::has('courses.learn') ? route('courses.learn', $course->id) : '#' }}"
-               style="display: inline-block; padding: 10px 22px; background: #28a745; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">
-                Vào học
-            </a>
-        @else
-            <form method="POST" action="{{ Route::has('courses.enroll') ? route('courses.enroll', $course->id) : '#' }}" style="display: inline;">
-                @csrf
-                <button type="submit"
-                        style="padding: 10px 22px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                    Ghi danh khóa học
-                </button>
-            </form>
-        @endif
+        @php
+    $canLearn = $isEnrolled || (auth()->check() && (auth()->id() === $course->teacher_id || auth()->user()->role === 'admin'));
+@endphp
+
+@if($canLearn)
+    <a href="{{ Route::has('courses.learn') ? route('courses.learn', $course->id) : '#' }}"
+       style="display: inline-block; padding: 10px 22px; background: #28a745; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">
+        Vào học
+    </a>
+@else
+   <form method="POST" action="{{ Route::has('courses.enroll') ? route('courses.enroll', $course->id) : '#' }}" style="display: inline;">
+        @csrf
+        <button type="submit"
+                style="padding: 10px 22px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            Ghi danh khóa học
+        </button>
+    </form>
+
+    {{-- Nút bấm thử vào học ngay khi chưa ghi danh để test chặn quyền HT-NFR2 --}}
+    <a href="{{ Route::has('courses.learn') ? route('courses.learn', $course->id) : '#' }}"
+       style="display: inline-block; margin-left: 10px; padding: 10px 18px; background: #6c757d; color: #fff; text-decoration: none; border-radius: 4px;">
+        Vào học thử &rarr;
+    </a>
+@endif
     </div>
 
     {{-- Danh sách bài học (chỉ tiêu đề, chưa cho xem nội dung) --}}

@@ -21,14 +21,20 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 // Chi tiết khóa học công khai (HT-02)
 Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+// Học bài & đánh dấu hoàn thành (HT-05) - CHỈ THÊM 4 DÒNG NÀY VÀO ĐÂY:
+Route::middleware('auth')->group(function () {
+    Route::get('/courses/{course}/learn/{lesson?}', [CourseController::class, 'learn'])->name('courses.learn');
+    Route::post('/courses/{course}/lessons/{lesson}/complete', [CourseController::class, 'completeLesson'])->name('lessons.complete');
+});
 
 // Phân hệ Học viên (student) - HT-03, HT-06
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/dashboard', fn () => 'Xin chào! Đây là trang học viên.');
     Route::post('/courses/{course}/quiz/start', [QuizController::class, 'start'])->name('quiz.start');
     Route::post('/quiz/{attempt}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
-});
-
+    
+    });
+    
 // Phân hệ Giảng viên (teacher)
 Route::middleware(['auth', 'role:teacher'])->group(function () {
     Route::get('/teacher/dashboard', function () {
