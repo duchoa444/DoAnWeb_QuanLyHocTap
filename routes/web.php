@@ -31,6 +31,9 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::post('/courses/{course}/quiz/start', [QuizController::class, 'start'])->name('quiz.start');
     Route::post('/quiz/{attempt}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
 
+    Route::get('/courses/{course}/quiz', [QuizController::class, 'take'])->name('quiz.take');
+    Route::get('/quiz/{attempt}/result', [QuizController::class, 'result'])->name('quiz.result');
+
     // Hồ sơ cá nhân & Lịch sử thi (HT-07)
     Route::get('/profile', [StudentProfileController::class, 'index'])->name('student.profile');
     Route::put('/profile', [StudentProfileController::class, 'updateProfile'])->name('student.profile.update');
