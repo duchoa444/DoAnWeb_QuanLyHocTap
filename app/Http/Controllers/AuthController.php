@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\AuthService;
-
+use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
     protected $authService;
@@ -50,14 +50,15 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect('/')
-            ->with('success', 'Đăng nhập thành công!');
+        return redirect()->route('teacher.courses.index')
+    ->with('success', 'Đăng nhập thành công!');
     }
 
     // Đăng xuất
+    // Đăng xuất
     public function logout(Request $request)
     {
-        $this->authService->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
