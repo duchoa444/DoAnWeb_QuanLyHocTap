@@ -28,6 +28,7 @@
 
     <form action="{{ route('teacher.courses.update', $course->id) }}"
           method="POST"
+          enctype="multipart/form-data"
           style="background: white; padding: 25px; border: 1px solid #ddd; border-radius: 8px;">
 
         @csrf
@@ -73,6 +74,29 @@
                     <option value="published" {{ old('status', $course->status) === 'published' ? 'selected' : '' }}>Xuất bản</option>
                 </select>
             </div>
+        </div>
+
+        {{-- Ảnh bìa khóa học --}}
+        @php
+            $currentThumb = $course->thumbnail ?? $course->image ?? null;
+            $currentThumbUrl = ($currentThumb && file_exists(public_path($currentThumb))) ? asset($currentThumb) : null;
+        @endphp
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 8px;">
+                Ảnh bìa khóa học
+            </label>
+
+            @if($currentThumbUrl)
+                <div style="margin-bottom: 10px;">
+                    <img src="{{ $currentThumbUrl }}" alt="{{ $course->title }}"
+                         style="max-width: 280px; max-height: 160px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; display: block;">
+                    <small style="color: #666;">Ảnh bìa hiện tại (chọn tệp mới bên dưới nếu muốn thay đổi).</small>
+                </div>
+            @endif
+
+            <input type="file" name="thumbnail" accept="image/*"
+                   style="width: 100%; box-sizing: border-box; padding: 9px; border: 1px solid #ccc; border-radius: 5px; background: #fafafa;">
         </div>
 
         <div style="margin-bottom: 20px;">

@@ -5,7 +5,20 @@
         &larr; Quay lại danh sách khóa học
     </a>
 
+    @php
+        $thumb = $course->thumbnail ?? $course->image ?? null;
+        $thumbUrl = ($thumb && file_exists(public_path($thumb))) ? asset($thumb) : null;
+    @endphp
+
     <div style="background: #fff; padding: 24px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 24px;">
+        @if($thumbUrl)
+            <div style="margin-bottom: 18px;">
+                <img src="{{ $thumbUrl }}"
+                     alt="{{ $course->title }}"
+                     style="width: 100%; max-height: 340px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; display: block;">
+            </div>
+        @endif
+
         <span style="display: inline-block; padding: 4px 10px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 13px; margin-bottom: 10px;">
             {{ $course->category->name ?? 'Chưa phân loại' }}
         </span>
@@ -68,4 +81,4 @@
     </div>
 </div>
 
-@include('footer')  
+@include('footer')

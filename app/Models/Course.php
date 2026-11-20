@@ -12,6 +12,7 @@ class Course extends Model
         'teacher_id',
         'title',
         'description',
+        'thumbnail',
         'quiz_minutes',
         'status',
     ];

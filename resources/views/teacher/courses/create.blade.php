@@ -13,7 +13,7 @@
         </div>
     @endif
 
-    <form action="{{ route('teacher.courses.store') }}" method="POST">
+    <form action="{{ route('teacher.courses.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         {{-- Thông tin khóa học --}}
@@ -44,6 +44,18 @@
                         <option value="pending" {{ old('status') === 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
                         <option value="published" {{ old('status', 'published') === 'published' ? 'selected' : '' }}>Xuất bản</option>
                     </select>
+                </div>
+            </div>
+
+            {{-- Ảnh bìa khóa học --}}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 6px;">Ảnh bìa khóa học</label>
+                <input type="file" name="thumbnail" accept="image/*" onchange="previewThumbnail(event)"
+                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fafafa;">
+                <small style="color: #666; display: block; margin-top: 4px;">Định dạng hỗ trợ: JPG, PNG, GIF, WEBP (tối đa 2MB).</small>
+                <div id="thumbnail-preview-wrap" style="display: none; margin-top: 10px;">
+                    <img id="thumbnail-preview" src="" alt="Xem trước ảnh bìa"
+                         style="max-width: 280px; max-height: 160px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
                 </div>
             </div>
 
@@ -113,6 +125,19 @@
 </div>
 
 <script>
+    function previewThumbnail(event) {
+        const file = event.target.files[0];
+        const wrap = document.getElementById('thumbnail-preview-wrap');
+        const img = document.getElementById('thumbnail-preview');
+
+        if (file) {
+            img.src = URL.createObjectURL(file);
+            wrap.style.display = 'block';
+        } else {
+            wrap.style.display = 'none';
+        }
+    }
+
     let lessonIndex = {{ count($oldLessons) }};
 
     function addLessonRow() {

@@ -94,3 +94,33 @@ NHẬT KÝ SỬ DỤNG AI - NGUYỄN HOÀNG ANH VŨ (TV1 - LE)
 - **Kết quả AI phản hồi & Đánh giá:**
   > AI đã xác định đúng nguyên nhân lỗi `Method Not Allowed` xuất phát từ việc thiếu route `courses.enroll` khiến thuộc tính `action` của biểu mẫu trên `courses/show.blade.php` bị gán thành `#`, từ đó bổ sung định tuyến `POST /courses/{course}/enroll` và phương thức `enroll()` trong `CourseController` (có kiểm tra chống ghi danh trùng lặp và cập nhật sĩ số học viên). Tiếp đó, AI hỗ trợ xử lý lỗi `404 Not Found` tại `/my-courses` bằng cách bổ sung phương thức `myCourses()` truy vấn bảng `enrollments` cùng giao diện `courses/my-courses.blade.php` đồng bộ header/footer của nhóm, giúp học viên chuyển mạch liền mạch từ danh sách khóa học đã đăng ký sang trang học bài giảng (`HT-04`).
 - **Bài học rút ra:** Khi sử dụng điều kiện `Route::has(...)` trên giao diện Blade, cần đảm bảo toàn bộ tên route liên kết giữa các phân hệ (ghi danh, danh sách khóa học cá nhân, vào học) đã được khai báo đầy đủ trong `routes/web.php` và làm mới bộ nhớ đệm định tuyến (`php artisan route:clear`).
+## AI-10: Chuẩn hóa CRUD khóa học giảng viên, gỡ bỏ ảnh bìa và dọn dẹp view trùng lặp (HT-09)
+- **Thời gian:** 01:15 - 01:40 (Thứ 7, Ngày 21/11)
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  > "Khắc phục lỗi biến chưa khai báo và lệch tên biến trong Teacher\CourseController, gỡ bỏ hoàn toàn chức năng upload ảnh bìa (thumbnail) khỏi toàn bộ luồng tạo/sửa/hiển thị khóa học, chuẩn hóa validation trường status và rà soát xóa các tệp view bị trùng lặp trong thư mục resources/views/courses."
+- **Kết quả AI phản hồi & Đánh giá:**
+  > AI đã chỉ ra nguyên nhân lỗi xuất phát từ việc đặt nhầm đoạn xử lý tệp vào phương thức `edit()` và lệch tên biến `$courseData` với `$data`, từ đó tái cấu trúc lại `store()` và `update()` trong `app/Http/Controllers/Teacher/CourseController.php` theo chuẩn `DB::transaction`. Đồng thời, AI loại bỏ toàn bộ logic xử lý ảnh bìa cùng thẻ `<input type="file" name="thumbnail">` trên `create.blade.php`, `edit.blade.php`, `courses/show.blade.php`, cập nhật rule validation cho `status` (`draft`, `pending`, `published`) và đối chiếu cây thư mục để xóa 3 tệp view dư thừa (`courses/create.blade.php`, `courses/edit.blade.php`, `courses/my-courses.blade.php`).
+- **Bài học rút ra:** Cần thống nhất phạm vi trường dữ liệu và cấu trúc thư mục giao diện giữa các thành viên trước khi triển khai; khi lược bỏ một tính năng như ảnh bìa phải dọn sạch đồng bộ từ Controller, quy tắc kiểm tra dữ liệu đến các tệp Blade liên quan để tránh dư thừa mã nguồn.
+
+---
+
+## AI-11: Đồng bộ lưu danh sách bài học động và khắc phục lỗi hiển thị ở trang chi tiết khóa học (HT-10)
+- **Thời gian:** 01:40 - 01:55 (Thứ 7, Ngày 21/11)
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  > "Sửa lỗi tạo hoặc chỉnh sửa khóa học xong nhưng hệ thống vẫn hiển thị 0 bài học, bổ sung khu vực thêm/sửa/xóa động danh sách bài học vào giao diện teacher/courses/edit.blade.php và khắc phục lỗi lặp 2 thông báo đỏ khi học viên bấm Vào học ở khóa học chưa có bài giảng."
+- **Kết quả AI phản hồi & Đánh giá:**
+  > AI đã phát hiện lỗi lệch tên trường `quiz_duration` thành `quiz_minutes` trong `edit.blade.php` khiến biểu mẫu bị chặn ở bước validation trước khi lưu bài học, từ đó bổ sung phương thức `syncLessons()` trong `Teacher\CourseController.php` để tự động thêm mới, cập nhật bản ghi cũ theo `lessons[idx][id]` và xóa các bài học bị gỡ trên giao diện kèm mã JavaScript (`addLessonRow()`, `removeLessonRow()`). Trên trang `resources/views/courses/show.blade.php`, AI đã xóa 2 khối `session('success')` và `session('error')` bị trùng lặp với `header.blade.php`, đồng thời khóa nút *Vào học* thành trạng thái *"Giảng viên đang cập nhật bài học"* khi `$course->lessons->isEmpty()`.
+- **Bài học rút ra:** Khi xử lý dữ liệu quan hệ 1-nhiều (`courses` - `lessons`) trên cùng một biểu mẫu, việc bọc thao tác trong `DB::transaction` và kiểm tra khớp tuyệt đối thuộc tính `name` giữa Blade với quy tắc `validate()` là điều kiện bắt buộc để đảm bảo dữ liệu được lưu xuống cơ sở dữ liệu.
+
+---
+
+## AI-12: Tích hợp lưu câu hỏi khởi tạo và điều hướng quản lý đề thi trắc nghiệm (HT-11)
+- **Thời gian:** 01:55 - 02:05 (Thứ 7, Ngày 21/11)
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  > "Kết nối liền mạch luồng tạo và chỉnh sửa khóa học với trang quản lý ngân hàng câu hỏi trắc nghiệm (teacher.questions.index), hỗ trợ lưu danh sách câu hỏi ban đầu khi khởi tạo khóa học và đồng bộ hiển thị thời gian kiểm tra (quiz_minutes) cho học viên."
+- **Kết quả AI phản hồi & Đánh giá:**
+  > AI đã tích hợp phương thức `storeQuestions()` vào trong `DB::transaction` của `CourseController@store` (tự động nhận diện linh hoạt tên cột của bảng `questions` như `content`/`question_text`, `correct_answer`/`correct_option`) và thiết lập chuyển hướng sau khi tạo khóa học sang `route('teacher.questions.index', $courseId)`. Ngoài ra, AI bổ sung nút liên kết nhanh *"Quản lý đề thi trắc nghiệm →"* có kiểm tra điều kiện `Route::has('teacher.questions.index')` trên `teacher/courses/edit.blade.php` và hiển thị thông số `quiz_minutes` trên trang chi tiết khóa học `courses/show.blade.php`.
+- **Bài học rút ra:** Thiết kế luồng điều hướng liên hoàn từ tạo khóa học $\rightarrow$ thêm bài học $\rightarrow$ soạn câu hỏi trắc nghiệm giúp giảng viên hoàn thiện học liệu trọn vẹn trong một mạch thao tác, đồng thời kiểm tra tồn tại route trước khi hiển thị nút chuyển trang giúp tránh lỗi phát sinh khi ghép nhánh mã nguồn.
