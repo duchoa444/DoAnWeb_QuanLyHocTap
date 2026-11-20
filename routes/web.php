@@ -57,7 +57,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
 
     // Duyệt và ẩn khóa học vi phạm (HT-15 - gộp chung trang admin/users)
-    Route::get('/courses', [UserManagementController::class, 'index'])->name('courses.index');
+    Route::get('/courses', [AdminCourseController::class, 'index'])->name('courses.index');
+    Route::get('/approve-courses', [AdminCourseController::class, 'index'])->name('courses.approve-page');
     Route::patch('/courses/{course}/approve', [AdminCourseController::class, 'approve'])->name('courses.approve');
     Route::patch('/courses/{course}/hide', [AdminCourseController::class, 'hide'])->name('courses.hide');
 
