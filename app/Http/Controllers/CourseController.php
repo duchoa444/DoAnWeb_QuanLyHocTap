@@ -1,110 +1,147 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Category;
-use App\Services\CourseService;
+use App\Models\Course;
+use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class CourseController extends Controller
 {
-    protected $courseService;
-
-    public function __construct(CourseService $courseService)
+    // Danh sách khóa học công khai
+    public function index(Request $request): View
     {
-        $this->courseService = $courseService;
-    }
+        $categories = Category::orderBy('name')->get();
+        $teachers = User::where('role', 'teacher')
+            ->orderBy('name')
+            ->get();
 
-    // Danh sách khóa học
-    public function index()
-    {
-        $courses = $this->courseService->getCourses(
-            auth()->id()
-        );
+        $query = Course::query()
+            ->with(['category:id,name', 'teacher:id,name'])
+            ->withCount('lessons')
+            ->whereIn('status', ['published', 'public']);
 
-        return view('courses.index', compact('courses'));
-    }
+        // Tìm theo tên khóa học
+        if ($request->filled('keyword')) {
+            $query->where(
+                'title',
+                'like',
+                '%' . trim($request->keyword) . '%'
+            );
+        }
 
-    // Form thêm khóa học
-    public function create()
-    {
-    $categories = Category::all();
+        // Lọc theo danh mục
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
 
-    return view('courses.create', compact('categories'));
-    }
+        // Lọc theo giảng viên
+        if ($request->filled('teacher_id')) {
+            $query->where('teacher_id', $request->teacher_id);
+        }
 
-    // Lưu khóa học mới
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'quiz_minutes' => 'required|integer|min:1',
-            'status' => 'required|in:draft,published',
-        ]);
+        // Phân trang 9 khóa học/trang
+        $courses = $query->latest()
+            ->paginate(9)
+            ->withQueryString();
 
-        $this->courseService->createCourse(
-            $data,
-            auth()->id()
-        );
-
-        return redirect()
-            ->route('teacher.courses.index')
-            ->with('success', 'Thêm khóa học thành công!');
+        return view('courses.index', compact(
+            'courses',
+            'categories',
+            'teachers'
+        ));
     }
 
     // Chi tiết khóa học
-    public function show($id)
+    public function show(Course $course): View
     {
-        $course = $this->courseService->getCourse(
-            $id,
-            auth()->id()
+        abort_unless(
+            in_array($course->status, ['published', 'public']),
+            404
         );
 
-        return view('courses.show', compact('course'));
+        $course->load(['category', 'teacher', 'lessons']);
+
+        $hasEnrollmentsTable = Schema::hasTable('enrollments');
+
+        $enrollmentsCount = $hasEnrollmentsTable
+            ? DB::table('enrollments')
+                ->where('course_id', $course->id)
+                ->count()
+            : 0;
+
+        $course->enrollments_count = $enrollmentsCount;
+
+        $isEnrolled = false;
+
+        if (auth()->check() && $hasEnrollmentsTable) {
+            $isEnrolled = DB::table('enrollments')
+                ->where('course_id', $course->id)
+                ->where('user_id', auth()->id())
+                ->exists();
+        }
+
+        return view('courses.show', compact(
+            'course',
+            'isEnrolled',
+            'enrollmentsCount'
+        ));
     }
 
-    // Form chỉnh sửa
-    public function edit($id)
-{
-    $course = $this->courseService->getCourse($id, auth()->id());
-    $categories = Category::all();
-
-    return view('courses.edit', compact('course', 'categories'));
-}
-
-    // Cập nhật khóa học
-    public function update(Request $request, $id)
+    // Ghi danh khóa học
+    public function enroll(Course $course)
     {
-        $data = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'quiz_minutes' => 'required|integer|min:1',
-            'status' => 'required|in:draft,published',
+        $userId = auth()->id();
+
+        $exists = DB::table('enrollments')
+            ->where('user_id', $userId)
+            ->where('course_id', $course->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->with(
+                'error',
+                'Bạn đã ghi danh khóa học này rồi.'
+            );
+        }
+
+        DB::table('enrollments')->insert([
+            'user_id' => $userId,
+            'course_id' => $course->id,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        $this->courseService->updateCourse(
-            $id,
-            auth()->id(),
-            $data
+        return back()->with(
+            'success',
+            'Ghi danh khóa học thành công!'
         );
-
-        return redirect()
-            ->route('teacher.courses.index')
-            ->with('success', 'Cập nhật khóa học thành công!');
     }
 
-    // Xóa khóa học
-    public function destroy($id)
+    // Danh sách khóa học đã ghi danh
+    public function myCourses(): View
     {
-        $this->courseService->deleteCourse(
-            $id,
-            auth()->id()
-        );
+        $enrollments = DB::table('enrollments')
+            ->where('user_id', auth()->id())
+            ->orderByDesc('created_at')
+            ->get()
+            ->keyBy('course_id');
 
-        return redirect()
-            ->route('teacher.courses.index')
-            ->with('success', 'Xóa khóa học thành công!');
+        $courses = Course::with([
+                'category:id,name',
+                'teacher:id,name'
+            ])
+            ->withCount('lessons')
+            ->whereIn('id', $enrollments->keys())
+            ->get();
+
+        return view('courses.my-courses', compact(
+            'courses',
+            'enrollments'
+        ));
     }
 }

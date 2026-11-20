@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\AuthService;
-
+use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
     protected $authService;
@@ -55,9 +55,10 @@ class AuthController extends Controller
     }
 
     // Đăng xuất
+    // Đăng xuất
     public function logout(Request $request)
     {
-        $this->authService->logout();
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

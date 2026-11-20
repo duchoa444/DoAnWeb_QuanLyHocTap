@@ -68,6 +68,7 @@ class CourseService
     // PHẦN 2: CHỨC NĂNG ADMIN
     // ==========================================
 
+    // Danh sách khóa học dành cho Admin
     public function getAdminCoursesList(
         string $search = '',
         string $status = ''
@@ -79,6 +80,7 @@ class CourseService
         );
     }
 
+    // Duyệt khóa học
     public function approveCourse(Course $course): bool
     {
         return $this->courseRepository->updateStatus(
@@ -87,6 +89,7 @@ class CourseService
         );
     }
 
+    // Ẩn khóa học
     public function hideCourse(Course $course): bool
     {
         return $this->courseRepository->updateStatus(
@@ -95,6 +98,7 @@ class CourseService
         );
     }
 
+    // Đếm khóa học chờ duyệt
     public function getPendingCoursesCount(): int
     {
         return $this->courseRepository->countDraftCourses();
