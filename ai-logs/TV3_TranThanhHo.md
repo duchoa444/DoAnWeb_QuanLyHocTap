@@ -64,3 +64,10 @@
 - *Prompt:* "Hướng dẫn viết xử lý POST đánh dấu hoàn thành bài học vào bảng `lesson_progress` bằng Laravel sao cho không bị lưu trùng dữ liệu khi người dùng bấm nhiều lần, đồng thời hỗ trợ kịch bản kiểm thử tích hợp luồng Ghi danh -> Vào học -> Đánh dấu hoàn thành."
 - *Kết quả AI phản hồi & Đánh giá:* AI đề xuất sử dụng `firstOrCreate()` kết hợp ràng buộc duy nhất `UNIQUE(user_id, lesson_id)` trong database để đảm bảo mỗi bài học chỉ được ghi nhận hoàn thành đúng 1 lần, đồng thời cập nhật chính xác bộ đếm tiến độ học tập (`số bài hoàn thành / tổng số bài`) trên giao diện.
 - *Bài học rút ra:* Khi phát triển tính năng theo từng nhánh Git độc lập (`feature/HT-05-hoc-bai`) trước khi merge với nhánh ghi danh của thành viên khác, cần tách bạch rõ phần code kiểm thử tạm thời và dọn sạch các route phụ trợ trước khi `git push` để tránh xung đột mã nguồn.
+## AI-08: Hoàn thiện điều hướng từ trang chi tiết khóa học (`courses/show.blade.php`) và kiểm thử tích hợp luồng HT-05
+
+- *Thời gian:* 10:30 – 11:30 (Thứ 6, Ngày 10 – Tuần 2)
+- *Công cụ AI:* Gemini
+- *Prompt:* "Hỗ trợ cập nhật giao diện trang chi tiết khóa học `resources/views/courses/show.blade.php` để điều hướng sang trang học bài (`courses.learn`), xử lý tình huống khi nhánh ghi danh `HT-04` chưa merge vào nhánh hiện tại và kiểm thử toàn diện luồng truy cập trái phép (HT-NFR2) cũng như luồng học bài chính thức."
+- *Kết quả AI phản hồi & Đánh giá:* AI hướng dẫn kiểm tra điều kiện `$canLearn` (đã ghi danh, giảng viên của khóa hoặc admin) để hiển thị nút **Vào học** hoặc **Ghi danh khóa học**, đồng thời bổ sung kịch bản kiểm thử chặn quyền truy cập khi chưa ghi danh (`403`/redirect kèm thông báo lỗi) và dọn sạch route ghi danh tạm trước khi đẩy code lên Pull Request.
+- *Bài học rút ra:* Sử dụng `Route::has()` trong Blade view giúp giao diện hoạt động an toàn ngay cả khi các tính năng liên quan (`HT-04`) đang được phát triển song song ở nhánh khác, tránh phát sinh lỗi giao diện khi tích hợp.
