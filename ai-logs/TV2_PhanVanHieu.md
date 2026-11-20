@@ -1,48 +1,64 @@
 # Nhật ký sử dụng AI (AI Log) – Thành viên 2 (TV2)
-**Dự án:** Hệ thống Quản lý Học tập Trực tuyến (`DoAnWeb_QuanLyHocTap`)
-**Tính năng phụ trách chính:** `HT-06` – Làm bài & chấm điểm trắc nghiệm tự động
-**Nhánh Git:** `feature/HT-06-trac-nghiem`
+**Họ và tên:** Phan Văn Hiếu (`hieupv11`)  
+**Vai trò:** Backend Lead (TV2)  
+**Dự án:** Hệ thống Quản lý Học tập Trực tuyến (`DoAnWeb_QuanLyHocTap`)  
+**Tính năng phụ trách chính:** `HT-03` (Đăng nhập, Đăng ký, Phân quyền) & `HT-06` (Làm bài & chấm điểm trắc nghiệm tự động)  
+**Nhánh Git chính:** `feature/HT-06-trac-nghiem`  
 
 ---
 
-## Tuần 1: Phân tích Đặc tả, Thiết kế Hệ thống & Cơ sở Dữ liệu
+## Tóm tắt Các phiên làm việc với AI (Tổng hợp Tuần 1 – Tuần 2)
+
+| Phiên / Thời điểm | Chức năng | Nội dung chính sử dụng AI | Mức độ can thiệp thủ công |
+| :--- | :--- | :--- | :--- |
+| **Ngày 1 – 2** | `HT-03`, `HT-06` | Phân tích đặc tả, thiết kế ERD (`users`, `questions`, `quiz_attempts`) & quy chuẩn Git | Đối chiếu khóa ngoại (`category_id`, `teacher_id`) với nhóm |
+| **Ngày 3 – 4** | `HT-03`, `HT-06` | Viết Migration, Seeder dữ liệu mẫu & khung xác thực đăng ký/đăng nhập | Thêm index `(user_id, course_id)`, kiểm thử DB trên phpMyAdmin |
+| **Ngày 5** | `HT-03` | Hoàn thiện `AuthController`, Middleware phân quyền (`role:admin/teacher/student`) | Rà soát xung đột migration & kiểm thử phân luồng vai trò |
+| **Ngày 6** | `HT-06` | Xây dựng `QuizService` (`start`, `submit`) dùng `DB::transaction` & `lockForUpdate` | Bổ sung khôi phục lượt làm dở khi F5 & tự chốt 0 điểm lượt quá hạn |
+| **Ngày 7** | `HT-06` | Viết `QuizServiceTest` (PHPUnit) & chuyển đổi sang Query Builder (`DB::table`) | Tự viết thêm test case #3 (`1/4` điểm), sửa lỗi cú pháp & chạy PASS 3/3 |
+| **Ngày 8** | `HT-06` | Xây dựng `QuizController` (`take`, `result`), `getResult()` & 2 trang Blade View | Đồng bộ route với `routes/web.php` nhóm & test luồng end-to-end |
+
+---
+
+## Tuần 1: Phân tích Đặc tả, Thiết kế Hệ thống & Xác thực (`HT-03`)
 
 ### Ngày 1: Khởi tạo môi trường, Git Workflow & Phân tích yêu cầu
-- **Mục tiêu:** Thiết lập môi trường phát triển (XAMPP, PHP 8.x, Laravel, MySQL), đồng bộ nhánh Git nhóm và phân rã yêu cầu chức năng/phi chức năng cho module Trắc nghiệm (`HT-06`).
+- **Mục tiêu:** Thiết lập môi trường phát triển (XAMPP, PHP 8.x, Laravel, MySQL), đồng bộ nhánh Git nhóm và phân rã yêu cầu chức năng/phi chức năng cho hai module phụ trách (`HT-03` và `HT-06`).
 - **Nội dung hỗ trợ từ AI:**
-  - Gợi ý quy trình phân nhánh Git chuẩn (`main` -> `develop` -> `feature/HT-06-trac-nghiem`) và quy ước viết commit message theo chuẩn Conventional Commits kèm cờ `AI-assisted`.
-  - Hỗ trợ phân tích các ràng buộc nghiệp vụ cốt lõi từ tài liệu đặc tả: giới hạn tối đa 3 lượt làm bài (`HT-06`), chống lộ đáp án đúng xuống Client và kiểm soát thời gian nộp bài ở Server (`HT-NFR1`), kiểm tra điều kiện ghi danh trước khi thi (`HT-NFR2`).
+  - Gợi ý quy trình phân nhánh Git chuẩn (`main` -> `develop` -> `feature/...`) và quy ước viết commit message theo chuẩn Conventional Commits kèm cờ `AI-assisted`.
+  - Hỗ trợ phân tích các ràng buộc nghiệp vụ cốt lõi từ tài liệu đặc tả: xác thực mật khẩu băm (`Hash`) và phân quyền 3 vai trò (`HT-03`), giới hạn tối đa 3 lượt làm bài (`HT-06`), chống lộ đáp án đúng xuống Client và kiểm soát thời gian nộp bài ở Server (`HT-NFR1`), kiểm tra điều kiện ghi danh trước khi thi (`HT-NFR2`).
 - **Kiểm chứng & Chỉnh sửa thủ công:**
-  - Tự cấu hình file `.env` kết nối cơ sở dữ liệu MySQL cục bộ (`DoAn_QuanLyHocTap`) và kiểm tra quyền truy cập kho lưu trữ GitHub của nhóm.
+  - Tự cấu hình file `.env` kết nối cơ sở dữ liệu MySQL cục bộ (`quan_ly_hoc_tap`) và kiểm tra quyền truy cập kho lưu trữ GitHub của nhóm.
   - Đối chiếu danh sách yêu cầu với các thành viên còn lại (đặc biệt là module Khóa học và Ghi danh) để thống nhất đầu vào/đầu ra dữ liệu.
 
 ### Ngày 2: Thiết kế luồng nghiệp vụ & Mô hình hóa dữ liệu (ERD)
-- **Mục tiêu:** Thiết kế luồng xử lý chi tiết (Sequence/Activity flow) cho quá trình làm bài trắc nghiệm và chốt cấu trúc các bảng liên quan.
+- **Mục tiêu:** Thiết kế luồng xử lý chi tiết cho quá trình đăng nhập/phân quyền (`HT-03`) và làm bài trắc nghiệm (`HT-06`), chốt cấu trúc các bảng liên quan.
 - **Nội dung hỗ trợ từ AI:**
-  - Đề xuất cấu trúc 2 bảng chính phục vụ trắc nghiệm: `questions` (lưu nội dung câu hỏi, 4 lựa chọn `option_a..d`, `correct_option`) và `quiz_attempts` (lưu `user_id`, `course_id`, `started_at`, `submitted_at`, `score`).
+  - Đề xuất cấu trúc bảng `users` (bổ sung cột `role` và `is_active` phục vụ khóa/mở tài khoản) cùng 2 bảng chính phục vụ trắc nghiệm: `questions` (lưu nội dung câu hỏi, 4 lựa chọn `option_a..d`, `correct_option`) và `quiz_attempts` (lưu `user_id`, `course_id`, `started_at`, `submitted_at`, `score`).
   - Tư vấn bổ sung cột cấu hình thời gian làm bài `quiz_minutes` vào bảng `courses` thay vì gán cứng (hardcode) 15 phút để giảng viên có thể linh hoạt điều chỉnh theo từng khóa học.
 - **Kiểm chứng & Chỉnh sửa thủ công:**
   - Tự rà soát các khóa ngoại (`course_id`, `user_id`) và bổ sung cơ chế xóa tầng (`onDelete('cascade')`) nhằm tránh dữ liệu rác khi khóa học hoặc người dùng bị xóa.
   - Thống nhất với nhóm tên các cột khóa ngoại chuẩn trong bảng `courses` (`category_id`, `teacher_id`) để đảm bảo đồng bộ toàn dự án.
 
 ### Ngày 3: Xây dựng Migration & Kiểm thử cấu trúc CSDL
-- **Mục tiêu:** Viết các file migration tạo bảng `questions`, `quiz_attempts` và cập nhật bảng `courses`, chạy kiểm thử trên MySQL.
+- **Mục tiêu:** Viết các file migration tạo bảng `users`, `questions`, `quiz_attempts` và cập nhật bảng `courses`, chạy kiểm thử trên MySQL.
 - **Nội dung hỗ trợ từ AI:**
-  - Sinh cú pháp migration Laravel cho bảng `questions` (dùng kiểu `enum` hoặc `char(1)` cho `correct_option` giới hạn trong `A, B, C, D`) và bảng `quiz_attempts` (cho phép `submitted_at` và `score` nhận giá trị `nullable` khi học viên mới bắt đầu làm bài).
+  - Sinh cú pháp migration Laravel cho bảng `questions` (giới hạn `correct_option` trong `A, B, C, D`) và bảng `quiz_attempts` (cho phép `submitted_at` và `score` nhận giá trị `nullable` khi học viên mới bắt đầu làm bài).
 - **Kiểm chứng & Chỉnh sửa thủ công:**
   - Tự bổ sung đánh chỉ mục (`index`) cho cặp cột `(user_id, course_id)` trên bảng `quiz_attempts` để tối ưu tốc độ truy vấn đếm số lượt làm bài và tìm lượt làm dở.
   - Chạy `php artisan migrate:fresh` và kiểm tra trực tiếp cấu trúc bảng, kiểu dữ liệu, ràng buộc trên phpMyAdmin.
 
-### Ngày 4: Xây dựng Seeder dữ liệu mẫu & Thiết kế giao diện khung (Wireframe/Blade)
-- **Mục tiêu:** Tạo dữ liệu câu hỏi trắc nghiệm mẫu để phục vụ kiểm thử và dựng giao diện trang làm bài / xem kết quả.
+### Ngày 4: Xây dựng Seeder dữ liệu mẫu & Chức năng Đăng ký / Đăng nhập (`HT-03`)
+- **Mục tiêu:** Tạo dữ liệu tài khoản mẫu, câu hỏi trắc nghiệm mẫu và hoàn thiện luồng đăng ký, đăng nhập, đăng xuất (`HT-03`).
 - **Nội dung hỗ trợ từ AI:**
+  - Sinh khung `AuthController` (xử lý `register`, `login`, `logout` với `Auth::attempt()`, `session()->regenerate()` và mã hóa mật khẩu `Hash::make`) cùng middleware kiểm tra vai trò (`EnsureUserHasRole`).
   - Tạo mẫu `QuestionSeeder` sinh bộ câu hỏi trắc nghiệm mẫu gắn với các khóa học đang ở trạng thái `published`.
-  - Gợi ý bố cục giao diện trang làm bài (đồng hồ đếm ngược JavaScript đồng bộ theo mốc `started_at` từ Server, danh sách câu hỏi radio button và cảnh báo trước khi nộp bài).
 - **Kiểm chứng & Chỉnh sửa thủ công:**
-  - Tự điều chỉnh lại logic đồng hồ đếm ngược trên giao diện để tự động kích hoạt gửi form (`submit`) khi hết giờ, đồng thời vẫn giữ chốt chặn kiểm tra thời gian thực tế tại Server để chống gian lận từ trình duyệt.
+  - Tự bổ sung điều kiện kiểm tra trạng thái hoạt động của tài khoản (`is_active`) khi đăng nhập để ngăn tài khoản bị Admin khóa truy cập hệ thống.
+  - Kiểm thử thủ công đầy đủ các trường hợp: đăng ký trùng email, đăng nhập sai mật khẩu, điều hướng đúng dashboard theo từng vai trò (`admin`, `teacher`, `student`).
 
 ### Ngày 5: Rà soát tích hợp cuối Tuần 1 & Đồng bộ nhánh `develop`
-- **Mục tiêu:** Kiểm tra chéo schema với các thành viên trong nhóm, xử lý xung đột (conflict) và cập nhật tiến độ Tuần 1 trên Trello.
+- **Mục tiêu:** Kiểm tra chéo schema với các thành viên trong nhóm, xử lý xung đột (conflict) và hoàn tất thẻ `[HT-03]` trên Trello.
 - **Nội dung hỗ trợ từ AI:**
   - Hỗ trợ kiểm tra và giải quyết xung đột thứ tự thời gian (timestamp) giữa các file migration của các thành viên khi gộp nhánh về `develop`.
 - **Kiểm chứng & Chỉnh sửa thủ công:**
@@ -50,7 +66,7 @@
 
 ---
 
-## Tuần 2: Phát triển Logic Nghiệp vụ & Kiểm thử Tự động
+## Tuần 2: Phát triển Logic Nghiệp vụ, Kiểm thử & Giao diện Trắc nghiệm (`HT-06`)
 
 ### Ngày 6: Xây dựng Service xử lý Trắc nghiệm (`QuizService`)
 - **Mục tiêu:** Xây dựng tầng nghiệp vụ xử lý bắt đầu làm bài (`start`) và nộp bài (`submit`) hoàn toàn tại Server theo đúng đặc tả (`HT-06`, `HT-NFR1`, `HT-NFR2`).
@@ -67,10 +83,19 @@
 - **Mục tiêu:** Hoàn thiện tối thiểu 2 Unit Test cho `QuizService` và đảm bảo toàn bộ test chạy `PASS` độc lập trên môi trường kiểm thử.
 - **Nội dung hỗ trợ từ AI:**
   - Sinh khung file `tests/Unit/QuizServiceTest.php` sử dụng `RefreshDatabase` và viết 2 kịch bản kiểm thử cơ bản:
-    1. Chấm điểm chính xác thang điểm 10 (`8/10` câu đúng $rightarrow$ `8.0` điểm).
-    2. Từ chối bài nộp khi vượt quá thời hạn cho phép cộng 1 phút dung sai (`started_at` lùi 17 phút cho đề 15 phút $rightarrow$ ném ngoại lệ từ chối nộp).
-  - Hỗ trợ chuyển đổi truy vấn trong `QuizService` từ Eloquent Models (`Course`, `Enrollment`, `Question`, `QuizAttempt`) sang `DB::table(...)` để không bị lỗi thiếu class Model do các thành viên khác đang phát triển song song.
+    1. Chấm điểm chính xác thang điểm 10 (`8/10` câu đúng $\srightarrow$ `8.0` điểm).
+    2. Từ chối bài nộp khi vượt quá thời hạn cho phép cộng 1 phút dung sai (`started_at` lùi 17 phút cho đề 15 phút $\rightarrow$ ném ngoại lệ từ chối nộp).
+  - Hỗ trợ chuyển đổi truy vấn trong `QuizService` từ Eloquent Models sang `DB::table(...)` để không bị lỗi thiếu class Model do các thành viên khác đang phát triển song song.
 - **Kiểm chứng & Chỉnh sửa thủ công:**
   - Tự kiểm tra schema migration thực tế của nhóm (`categories`, `courses` dùng khóa ngoại `category_id` và `teacher_id`) để điều chỉnh hàm `seedQuizData()` trong file test khớp 100% với cấu trúc bảng.
-  - Tự viết thêm **test case thứ 3** (`test_bo_trong_cau_va_dap_an_khong_hop_le`): kiểm chứng trường hợp học viên bỏ trống câu hỏi hoặc gửi ký tự đáp án không hợp lệ (`'Z'`, `''`) thì hệ thống không báo lỗi mà tính câu đó sai (`1/4` câu đúng $rightarrow$ `2.5` điểm).
+  - Tự viết thêm **test case thứ 3** (`test_bo_trong_cau_va_dap_an_khong_hop_le`): kiểm chứng trường hợp học viên bỏ trống câu hỏi hoặc gửi ký tự đáp án không hợp lệ (`'Z'`, `''`) thì hệ thống không báo lỗi mà tính câu đó sai (`1/4` câu đúng $\rightarrow$ `2.5` điểm).
   - Xử lý lỗi cú pháp ký tự thoát (`\$`) phát sinh khi sao chép mã nguồn và chạy xác nhận **`3 passed (7 assertions)`** trên PHPUnit.
+
+### Ngày 8: Xây dựng Controller & Giao diện Làm bài / Kết quả Trắc nghiệm (`HT-06`)
+- **Mục tiêu:** Hoàn thiện luồng làm bài trắc nghiệm đầu cuối (end-to-end) gồm trang làm bài có đồng hồ đếm ngược và trang kết quả hiển thị điểm, đáp án đúng, số lượt còn lại.
+- **Nội dung hỗ trợ từ AI:**
+  - Bổ sung phương thức `QuizService::getResult()` chỉ trả về cột `correct_option` khi lượt làm bài đã có trạng thái nộp (`submitted_at != null`) và đúng chủ sở hữu (`user_id`), kết hợp tính toán `used_attempts`, `remaining_attempts` và `best_score`.
+  - Xây dựng `QuizController` (`start`, `take`, `submit`, `result`) và 2 giao diện Blade (`resources/views/student/quiz/take.blade.php` và `result.blade.php`) với đồng hồ đếm ngược JavaScript đồng bộ từ mốc `started_at` của Server.
+- **Kiểm chứng & Chỉnh sửa thủ công:**
+  - Đối chiếu file `routes/web.php` hiện có của nhóm và bổ sung 2 route GET (`quiz.take`, `quiz.result`) mà không làm thay đổi tên route `POST` (`quiz.start`, `quiz.submit`) đã gắn sẵn.
+  - Chạy kiểm thử thực tế trên trình duyệt toàn bộ luồng: đăng nhập học viên $\rightarrow$ vào làm bài $\rightarrow$ kiểm tra mã nguồn HTML không lộ đáp án $\rightarrow$ nộp bài $\rightarrow$ xem điểm, đáp án đúng và số lượt còn lại $\rightarrow$ kiểm tra chặn ở lượt thứ 4.
