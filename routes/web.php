@@ -45,10 +45,12 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])->name('courses.enroll');
 
     // Làm bài trắc nghiệm (HT-06)
-    Route::post('/courses/{course}/quiz/start', [QuizController::class, 'start'])->name('quiz.start');
-    Route::get('/courses/{course}/quiz', [QuizController::class, 'take'])->name('quiz.take');
-    Route::post('/quiz/{attempt}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
-    Route::get('/quiz/{attempt}/result', [QuizController::class, 'result'])->name('quiz.result');
+    Route::get('/courses/{courseId}/quiz', [QuizController::class, 'show'])->name('student.quizzes.show');
+    Route::match(['get', 'post'], '/courses/{courseId}/quiz/start', [QuizController::class, 'show'])->name('quiz.start');
+    Route::post('/quiz/{attemptId}/submit', [QuizController::class, 'submit'])->name('student.quizzes.submit');
+    Route::post('/quizzes/{attemptId}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
+    Route::get('/quiz/{attemptId}/result', [QuizController::class, 'result'])->name('student.quizzes.result');
+    Route::get('/quizzes/{attemptId}/result', [QuizController::class, 'result'])->name('quiz.result');
 
     // Hồ sơ cá nhân & Lịch sử thi (HT-07)
     Route::get('/profile', [StudentProfileController::class, 'index'])->name('student.profile');

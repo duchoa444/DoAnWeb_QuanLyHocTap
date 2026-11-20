@@ -12,6 +12,7 @@ class Course extends Model
         'teacher_id',
         'title',
         'description',
+        'thumbnail',
         'quiz_minutes',
         'status',
     ];
@@ -29,5 +30,13 @@ class Course extends Model
     public function lessons()
     {
         return $this->hasMany(Lesson::class);
+    }
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class, 'course_id');
+    }
+    public function questions()
+    {
+        return $this->hasMany(Question::class, 'course_id');
     }
 }

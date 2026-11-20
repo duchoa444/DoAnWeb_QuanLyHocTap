@@ -1,4 +1,3 @@
-
 @include('header')
 
 <div style="max-width: 1200px; margin: 20px auto; padding: 20px;">
@@ -6,14 +5,26 @@
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;">
         <div>
             <h2 style="margin: 0 0 8px;">Quản lý khóa học</h2>
-            <p style="color: #666; margin: 0;">Quản lý các khóa học do bạn tạo.</p>
+            <p style="color: #666; margin: 0;">Quản lý các khóa học và đề thi trắc nghiệm do bạn tạo.</p>
         </div>
 
         <a href="{{ route('teacher.courses.create') }}"
-           style="padding: 10px 18px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+           style="padding: 10px 18px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
             + Thêm khóa học
         </a>
     </div>
+
+    @if(session('success'))
+        <div style="padding: 12px 16px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 6px; margin-bottom: 16px;">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div style="padding: 12px 16px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 6px; margin-bottom: 16px;">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <form method="GET" action="{{ route('teacher.courses.index') }}"
           style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 8px;">
@@ -68,17 +79,24 @@
 
                         <td style="padding: 13px; text-align: center;">
                             @if($course->status === 'public' || $course->status === 'published')
-                                <span style="color: #198754;">Đã công khai</span>
+                                <span style="color: #198754; font-weight: 500;">Đã công khai</span>
+                            @elseif($course->status === 'pending')
+                                <span style="color: #0d6efd; font-weight: 500;">Chờ duyệt</span>
                             @elseif($course->status === 'hidden')
-                                <span style="color: #dc3545;">Đã ẩn</span>
+                                <span style="color: #dc3545; font-weight: 500;">Đã ẩn</span>
                             @else
-                                <span style="color: #d97706;">Bản nháp</span>
+                                <span style="color: #d97706; font-weight: 500;">Bản nháp</span>
                             @endif
                         </td>
 
                         <td style="padding: 13px; text-align: center; white-space: nowrap;">
+                            <a href="{{ route('teacher.questions.index', $course->id) }}"
+                               style="color: #198754; text-decoration: none; margin-right: 10px; font-weight: 500;">
+                                Đề thi
+                            </a>
+
                             <a href="{{ route('teacher.courses.edit', $course->id) }}"
-                               style="color: #007bff; text-decoration: none; margin-right: 8px;">
+                               style="color: #007bff; text-decoration: none; margin-right: 10px;">
                                 Sửa
                             </a>
 
@@ -89,7 +107,7 @@
                                 @method('DELETE')
 
                                 <button type="submit"
-                                        style="color: #dc3545; background: none; border: none; cursor: pointer;">
+                                        style="color: #dc3545; background: none; border: none; cursor: pointer; padding: 0;">
                                     Xóa
                                 </button>
                             </form>
