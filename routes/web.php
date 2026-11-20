@@ -7,6 +7,7 @@ use App\Http\Controllers\QuizController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\StudentProfileController;
 
 Route::redirect('/', '/courses');
 
@@ -22,11 +23,19 @@ Route::get('/courses', [CourseController::class, 'index'])->name('courses.index'
 // Chi tiết khóa học công khai (HT-02)
 Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
 
-// Phân hệ Học viên (student) - HT-03, HT-06
+// Phân hệ Học viên (student) - HT-03, HT-06, HT-07
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/dashboard', fn () => 'Xin chào! Đây là trang học viên.');
+    Route::get('/my-courses', [CourseController::class, 'myCourses'])->name('student.my-courses');
+    Route::post('/courses/{course}/enroll', [CourseController::class, 'enroll'])->name('courses.enroll');
     Route::post('/courses/{course}/quiz/start', [QuizController::class, 'start'])->name('quiz.start');
     Route::post('/quiz/{attempt}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
+
+    // Hồ sơ cá nhân & Lịch sử thi (HT-07)
+    Route::get('/profile', [StudentProfileController::class, 'index'])->name('student.profile');
+    Route::put('/profile', [StudentProfileController::class, 'updateProfile'])->name('student.profile.update');
+    Route::put('/profile/password', [StudentProfileController::class, 'updatePassword'])->name('student.password.update');
+    Route::get('/exam-history', [StudentProfileController::class, 'index'])->name('student.exam-history');
 });
 
 // Phân hệ Giảng viên (teacher)
