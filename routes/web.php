@@ -2,9 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\QuizController;
+use App\Http\Controllers\StudentProfileController;
+use App\Http\Controllers\Teacher\CourseController as TeacherCourseController;
 use App\Http\Controllers\Teacher\QuestionController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\Admin\UserManagementController;
 
 // Trang chủ
 Route::redirect('/', '/courses');
@@ -31,10 +37,10 @@ Route::get('/courses/{course}', [CourseController::class, 'show'])
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/dashboard', fn () => 'Xin chào! Đây là trang học viên.');
 
-    Route::get('/my-courses', [CourseController::class, 'myCourses'])
+    Route::get('/my-courses', [EnrollmentController::class, 'myCourses'])
         ->name('student.my-courses');
 
-    Route::post('/courses/{course}/enroll', [CourseController::class, 'enroll'])
+    Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])
         ->name('courses.enroll');
 
     Route::post('/courses/{course}/quiz/start', [QuizController::class, 'start'])
@@ -57,7 +63,7 @@ Route::middleware(['auth', 'role:student'])->group(function () {
         ->name('student.exam-history');
 });
 
-// Phân hệ giảng viên - HT-09
+// Phân hệ giảng viên (HT-09 & HT-11)
 Route::middleware(['auth', 'role:teacher'])
     ->prefix('teacher')
     ->name('teacher.')
@@ -69,6 +75,18 @@ Route::middleware(['auth', 'role:teacher'])
 
         Route::resource('courses', TeacherCourseController::class)
             ->except(['show']);
+
+        // Quản lý câu hỏi trắc nghiệm - HT-11
+        Route::get('/courses/{course}/questions', [QuestionController::class, 'index'])
+            ->name('questions.index');
+        Route::patch('/courses/{course}/quiz-duration', [QuestionController::class, 'updateDuration'])
+            ->name('questions.duration');
+        Route::post('/courses/{course}/questions', [QuestionController::class, 'store'])
+            ->name('questions.store');
+        Route::put('/courses/{course}/questions/{question}', [QuestionController::class, 'update'])
+            ->name('questions.update');
+        Route::delete('/courses/{course}/questions/{question}', [QuestionController::class, 'destroy'])
+            ->name('questions.destroy');
     });
 
 // Phân hệ quản trị viên
@@ -108,29 +126,3 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('categories', AdminCategoryController::class)
             ->only(['index', 'store', 'update', 'destroy']);
     });
-
-Route::middleware(['auth', 'role:admin'])->group(function () {
-
-    Route::get('/admin/dashboard', function () {
-        return 'Xin chào! Đây là trang quản trị viên.';
-    });
-
-});
-Route::get('/courses', function () {
-    return view('courses.index');
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])
-        ->name('courses.enroll');
-    Route::get('/my-courses', [EnrollmentController::class, 'myCourses'])
-        ->name('student.courses.index');
-});
-
-Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->name('teacher.')->group(function () {
-    Route::get('/courses/{course}/questions', [QuestionController::class, 'index'])->name('questions.index');
-    Route::patch('/courses/{course}/quiz-duration', [QuestionController::class, 'updateDuration'])->name('questions.duration');
-    Route::post('/courses/{course}/questions', [QuestionController::class, 'store'])->name('questions.store');
-    Route::put('/courses/{course}/questions/{question}', [QuestionController::class, 'update'])->name('questions.update');
-    Route::delete('/courses/{course}/questions/{question}', [QuestionController::class, 'destroy'])->name('questions.destroy');
-});
