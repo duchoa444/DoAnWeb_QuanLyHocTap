@@ -83,6 +83,11 @@ Route::middleware(['auth', 'role:teacher'])
         Route::delete('/courses/{course}/questions/{question}', [QuestionController::class, 'destroy'])
             ->name('questions.destroy');
     });
+        // Quản lý đề thi
+        Route::get('/teacher/exams', [App\Http\Controllers\Teacher\ExamController::class, 'index'])
+    ->name('teacher.exams.index');
+    Route::get('/teacher/exams/export', [App\Http\Controllers\Teacher\ExamController::class, 'export'])
+    ->name('teacher.exams.export');
 
 // Phân hệ quản trị viên (Admin)
 Route::middleware(['auth', 'role:admin'])
