@@ -2,229 +2,295 @@
 
 namespace App\Services;
 
+use App\Models\Course;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class QuizService
 {
     /**
-     * Bắt đầu lượt làm bài trắc nghiệm (HT-06, HT-NFR1, HT-NFR2)
+     * Khởi tạo hoặc tiếp tục lượt làm bài trắc nghiệm (HT-06)
      */
     public function start(int $userId, int $courseId): array
     {
-        return DB::transaction(function () use ($userId, $courseId) {
-            $course = DB::table('courses')->where('id', $courseId)->first();
-            if (!$course) {
-                throw new Exception('Không tìm thấy khóa học.', 404);
-            }
+        $course = Course::findOrFail($courseId);
 
-            // 1. Chỉ học viên đã ghi danh mới được làm bài (HT-NFR2)
-            $isEnrolled = DB::table('enrollments')
-                ->where('user_id', $userId)
-                ->where('course_id', $courseId)
-                ->exists();
+        $questions = $this->getNormalizedQuestions($courseId);
+        if ($questions->isEmpty()) {
+            throw new Exception('Khóa học này hiện chưa có câu hỏi trắc nghiệm.');
+        }
 
-            if (!$isEnrolled) {
-                throw new Exception('Bạn cần ghi danh khóa học trước khi làm bài trắc nghiệm.', 403);
-            }
+        $attemptCols = Schema::getColumnListing('quiz_attempts');
+        $userCol = in_array('user_id', $attemptCols) ? 'user_id' : 'student_id';
+        $startCol = in_array('started_at', $attemptCols) ? 'started_at' : 'created_at';
 
-            // 2. Lấy câu hỏi 4 lựa chọn, TUYỆT ĐỐI KHÔNG lấy cột correct_option (HT-NFR1)
-            $questions = DB::table('questions')
-                ->where('course_id', $courseId)
-                ->select('id', 'course_id', 'question_text', 'option_a', 'option_b', 'option_c', 'option_d')
-                ->get();
+        $maxAttempts = (int) ($course->max_attempts ?? 3);
+        if ($maxAttempts < 1) {
+            $maxAttempts = 3;
+        }
 
-            if ($questions->isEmpty()) {
-                throw new Exception('Khóa học này hiện chưa có câu hỏi trắc nghiệm.', 404);
-            }
+        $quizMinutes = (int) ($course->quiz_minutes ?? 30);
+        if ($quizMinutes < 1) {
+            $quizMinutes = 30;
+        }
 
-            $minutes = $course->quiz_minutes ?? 15;
-            $now = Carbon::now();
+        // Kiểm tra xem học viên có lượt làm bài nào đang mở (chưa nộp) không
+        $activeAttempt = DB::table('quiz_attempts')
+            ->where('course_id', $courseId)
+            ->where($userCol, $userId)
+            ->whereNull('submitted_at')
+            ->orderByDesc('id')
+            ->first();
 
-            // 3. Nếu đang có lượt làm dở (chưa nộp) và vẫn còn hạn -> trả về làm tiếp
-            $activeAttempt = DB::table('quiz_attempts')
-                ->where('user_id', $userId)
-                ->where('course_id', $courseId)
-                ->whereNull('submitted_at')
-                ->lockForUpdate()
-                ->first();
+        if ($activeAttempt) {
+            $startedAt = Carbon::parse($activeAttempt->{$startCol} ?? now());
+            $deadline = $startedAt->copy()->addMinutes($quizMinutes);
 
-            if ($activeAttempt) {
-                $deadline = Carbon::parse($activeAttempt->started_at)->addMinutes($minutes)->addMinute();
-                if ($now->lte($deadline)) {
-                    $attemptCount = DB::table('quiz_attempts')
-                        ->where('user_id', $userId)
-                        ->where('course_id', $courseId)
-                        ->count();
-
-                    return [
-                        'course'       => $course,
-                        'attempt'      => $activeAttempt,
-                        'attempt_no'   => $attemptCount,
-                        'quiz_minutes' => $minutes,
-                        'questions'    => $questions,
-                    ];
+            // Nếu lượt cũ đã quá giờ mà chưa nộp, tự động chốt 0 điểm để mở lượt mới
+            if (now()->greaterThanOrEqualTo($deadline)) {
+                $closeData = [
+                    'score'        => 0,
+                    'submitted_at' => $deadline,
+                ];
+                if (in_array('updated_at', $attemptCols)) {
+                    $closeData['updated_at'] = now();
                 }
 
-                // Quá hạn mà chưa nộp -> tự động chốt 0 điểm
                 DB::table('quiz_attempts')
                     ->where('id', $activeAttempt->id)
-                    ->update([
-                        'submitted_at' => $deadline,
-                        'score'        => 0,
-                        'updated_at'   => $now,
-                    ]);
+                    ->update($closeData);
+
+                $activeAttempt = null;
+            }
+        }
+
+        // Đếm số lượt đã hoàn thành nộp bài
+        $submittedCount = DB::table('quiz_attempts')
+            ->where('course_id', $courseId)
+            ->where($userCol, $userId)
+            ->whereNotNull('submitted_at')
+            ->count();
+
+        if ($activeAttempt) {
+            $attempt = $activeAttempt;
+            $startedAt = Carbon::parse($attempt->{$startCol} ?? now());
+            $remainingSeconds = max(1, (int) now()->diffInSeconds($startedAt->copy()->addMinutes($quizMinutes), false));
+        } else {
+            if ($submittedCount >= $maxAttempts) {
+                throw new Exception("Bạn đã sử dụng hết {$maxAttempts}/{$maxAttempts} lượt làm bài kiểm tra cho khóa học này.");
             }
 
-            // 4. Giới hạn tối đa 3 lần làm bài (HT-06)
-            $attemptCount = DB::table('quiz_attempts')
-                ->where('user_id', $userId)
-                ->where('course_id', $courseId)
-                ->lockForUpdate()
-                ->count();
-
-            if ($attemptCount >= 3) {
-                throw new Exception('Bạn đã sử dụng hết tối đa 3 lượt làm bài cho khóa học này.', 403);
-            }
-
-            // 5. Tạo lượt làm bài mới, chốt giờ bắt đầu tại Server
-            $attemptId = DB::table('quiz_attempts')->insertGetId([
-                'user_id'    => $userId,
-                'course_id'  => $courseId,
-                'started_at' => $now,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
-
-            $attempt = DB::table('quiz_attempts')->where('id', $attemptId)->first();
-
-            return [
-                'course'       => $course,
-                'attempt'      => $attempt,
-                'attempt_no'   => $attemptCount + 1,
-                'quiz_minutes' => $minutes,
-                'questions'    => $questions,
+            $insertData = [
+                'course_id' => $courseId,
+                $userCol    => $userId,
             ];
-        });
+
+            if (in_array('started_at', $attemptCols)) {
+                $insertData['started_at'] = now();
+            }
+            if (in_array('created_at', $attemptCols)) {
+                $insertData['created_at'] = now();
+            }
+            if (in_array('updated_at', $attemptCols)) {
+                $insertData['updated_at'] = now();
+            }
+
+            $newId = DB::table('quiz_attempts')->insertGetId($insertData);
+            $attempt = DB::table('quiz_attempts')->where('id', $newId)->first();
+            $remainingSeconds = $quizMinutes * 60;
+        }
+
+        $attemptNo = $submittedCount + 1;
+
+        return [
+            'course'            => $course,
+            'attempt'           => $attempt,
+            'attemptId'         => $attempt->id,
+            'attempt_id'        => $attempt->id,
+            'questions'         => $questions,
+            'quizMinutes'       => $quizMinutes,
+            'quiz_minutes'      => $quizMinutes,
+            'remainingSeconds'  => $remainingSeconds,
+            'remaining_seconds' => $remainingSeconds,
+            'attemptNumber'     => $attemptNo,
+            'attempt_number'    => $attemptNo,
+            'attempt_no'        => $attemptNo,
+            'maxAttempts'       => $maxAttempts,
+            'max_attempts'      => $maxAttempts,
+        ];
     }
 
     /**
-     * Nộp bài & chấm điểm tự động tại Server (HT-06, HT-NFR1)
+     * Chấm điểm và lưu kết quả nộp bài trắc nghiệm (HT-06)
      */
     public function submit(int $attemptId, int $userId, array $answers): array
     {
-        return DB::transaction(function () use ($attemptId, $userId, $answers) {
-            $attempt = DB::table('quiz_attempts')->where('id', $attemptId)->lockForUpdate()->first();
-            if (!$attempt) {
-                throw new Exception('Không tìm thấy lượt làm bài.', 404);
+        $attempt = DB::table('quiz_attempts')->where('id', $attemptId)->first();
+
+        if (!$attempt) {
+            throw new Exception('Không tìm thấy lượt làm bài kiểm tra.');
+        }
+
+        $ownerId = (int) ($attempt->user_id ?? $attempt->student_id ?? 0);
+        if ($ownerId !== $userId) {
+            throw new Exception('Bạn không có quyền nộp lượt làm bài này.');
+        }
+
+        if ($attempt->submitted_at !== null) {
+            throw new Exception('Lượt làm bài này đã được nộp trước đó.');
+        }
+
+        $questions = $this->getNormalizedQuestions((int) $attempt->course_id);
+        $totalQuestions = $questions->count();
+        $correctCount = 0;
+
+        foreach ($questions as $question) {
+            $chosen = strtoupper(trim((string) ($answers[$question->id] ?? '')));
+            $correct = strtoupper(trim((string) $question->correct_answer));
+
+            if ($chosen !== '' && $chosen === $correct) {
+                $correctCount++;
             }
+        }
 
-            if ((int) $attempt->user_id !== $userId) {
-                throw new Exception('Bạn không có quyền nộp bài thi này.', 403);
-            }
+        $score = $totalQuestions > 0
+            ? round(($correctCount / $totalQuestions) * 10, 2)
+            : 0.0;
 
-            if ($attempt->submitted_at !== null) {
-                throw new Exception('Lượt làm bài này đã được nộp trước đó.', 400);
-            }
+        $attemptCols = Schema::getColumnListing('quiz_attempts');
+        $updateData = [
+            'score'        => $score,
+            'submitted_at' => now(),
+        ];
 
-            $course = DB::table('courses')->where('id', $attempt->course_id)->first();
+        if (in_array('correct_count', $attemptCols)) {
+            $updateData['correct_count'] = $correctCount;
+        }
+        if (in_array('total_questions', $attemptCols)) {
+            $updateData['total_questions'] = $totalQuestions;
+        }
+        if (in_array('answers', $attemptCols)) {
+            $updateData['answers'] = json_encode($answers);
+        }
+        if (in_array('updated_at', $attemptCols)) {
+            $updateData['updated_at'] = now();
+        }
 
-            // Kiểm tra thời gian tại Server: started_at + quiz_minutes + 1 phút dung sai (HT-NFR1)
-            $now = Carbon::now();
-            $minutes = $course->quiz_minutes ?? 15;
-            $deadline = Carbon::parse($attempt->started_at)->addMinutes($minutes)->addMinute();
+        DB::table('quiz_attempts')
+            ->where('id', $attemptId)
+            ->update($updateData);
 
-            if ($now->gt($deadline)) {
-                DB::table('quiz_attempts')
-                    ->where('id', $attemptId)
-                    ->update([
-                        'submitted_at' => $now,
-                        'score'        => 0,
-                        'updated_at'   => $now,
-                    ]);
-                throw new Exception('Đã quá thời gian làm bài quy định, bài nộp bị từ chối.', 422);
-            }
-
-            // Chấm điểm tự động tại Server
-            $questions = DB::table('questions')->where('course_id', $attempt->course_id)->get();
-            $totalQuestions = $questions->count();
-            $correctCount = 0;
-
-            foreach ($questions as $question) {
-                $selected = strtoupper((string) ($answers[$question->id] ?? ''));
-                if ($selected !== '' && $selected === strtoupper($question->correct_option)) {
-                    $correctCount++;
-                }
-            }
-
-            $score = $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 10, 2) : 0;
-
-            DB::table('quiz_attempts')
-                ->where('id', $attemptId)
-                ->update([
-                    'submitted_at' => $now,
-                    'score'        => $score,
-                    'updated_at'   => $now,
-                ]);
-
-            $updatedAttempt = DB::table('quiz_attempts')->where('id', $attemptId)->first();
-
-            // Lấy điểm cao nhất trong tối đa 3 lần làm bài (HT-06)
-            $bestScore = DB::table('quiz_attempts')
-                ->where('user_id', $userId)
-                ->where('course_id', $attempt->course_id)
-                ->whereNotNull('submitted_at')
-                ->max('score');
-
-            return [
-                'attempt'         => $updatedAttempt,
-                'score'           => $score,
-                'best_score'      => $bestScore,
-                'correct_count'   => $correctCount,
-                'total_questions' => $totalQuestions,
-            ];
-        });
+        return [
+            'attempt_id'      => $attemptId,
+            'score'           => $score,
+            'correct_count'   => $correctCount,
+            'total_questions' => $totalQuestions,
+        ];
     }
+
     /**
-     * Lấy chi tiết kết quả & đáp án đúng SAU KHI ĐÃ NỘP BÀI (HT-06, HT-NFR1)
+     * Lấy chi tiết kết quả, đáp án đúng và số lượt thi còn lại (HT-06)
      */
     public function getResult(int $attemptId, int $userId): array
     {
         $attempt = DB::table('quiz_attempts')->where('id', $attemptId)->first();
+
         if (!$attempt) {
-            throw new Exception('Không tìm thấy lượt làm bài.', 404);
+            throw new Exception('Không tìm thấy kết quả lượt làm bài.');
         }
 
-        if ((int) $attempt->user_id !== $userId) {
-            throw new Exception('Bạn không có quyền xem kết quả lượt làm bài này.', 403);
+        $ownerId = (int) ($attempt->user_id ?? $attempt->student_id ?? 0);
+        if ($ownerId !== $userId) {
+            throw new Exception('Bạn không có quyền xem điểm lượt làm bài này.');
         }
 
         if ($attempt->submitted_at === null) {
-            throw new Exception('Bạn cần nộp bài trước khi xem đáp án và kết quả.', 403);
+            throw new Exception('Lượt làm bài này chưa được nộp.');
         }
 
-        $course = DB::table('courses')->where('id', $attempt->course_id)->first();
-        $questions = DB::table('questions')->where('course_id', $attempt->course_id)->get();
+        $course = Course::findOrFail($attempt->course_id);
+        $questions = $this->getNormalizedQuestions((int) $course->id);
 
-        $usedAttempts = DB::table('quiz_attempts')
-            ->where('user_id', $userId)
-            ->where('course_id', $attempt->course_id)
-            ->count();
+        $totalQuestions = $questions->count();
+        $score = (float) ($attempt->score ?? 0);
+        $correctCount = isset($attempt->correct_count)
+            ? (int) $attempt->correct_count
+            : ($totalQuestions > 0 ? (int) round(($score / 10) * $totalQuestions) : 0);
 
-        $bestScore = DB::table('quiz_attempts')
-            ->where('user_id', $userId)
-            ->where('course_id', $attempt->course_id)
+        $attemptCols = Schema::getColumnListing('quiz_attempts');
+        $userCol = in_array('user_id', $attemptCols) ? 'user_id' : 'student_id';
+
+        $maxAttempts = (int) ($course->max_attempts ?? 3);
+        if ($maxAttempts < 1) {
+            $maxAttempts = 3;
+        }
+
+      $allAttempts = DB::table('quiz_attempts')
+            ->where('course_id', $course->id)
+            ->where($userCol, $userId)
             ->whereNotNull('submitted_at')
-            ->max('score');
+            ->orderBy('id')
+            ->get();
+
+        $usedAttempts = $allAttempts->count();
+        $bestScore = (float) ($allAttempts->max('score') ?? $score);
+        $remainingAttempts = max(0, $maxAttempts - $usedAttempts);
+
+        $savedAnswers = [];
+        if (isset($attempt->answers) && is_string($attempt->answers)) {
+            $decoded = json_decode($attempt->answers, true);
+            if (is_array($decoded)) {
+                $savedAnswers = $decoded;
+            }
+        }
 
         return [
             'course'             => $course,
             'attempt'            => $attempt,
-            'questions'          => $questions, // Chỉ trả correct_option khi submitted_at != null
-            'used_attempts'      => $usedAttempts,
-            'remaining_attempts' => max(0, 3 - $usedAttempts),
+            'attempts'           => $allAttempts,
+            'questions'          => $questions,
+            'score'              => $score,
+            'bestScore'          => $bestScore,
             'best_score'         => $bestScore,
+            'correctCount'       => $correctCount,
+            'correct_count'      => $correctCount,
+            'totalQuestions'     => $totalQuestions,
+            'total_questions'    => $totalQuestions,
+            'maxAttempts'        => $maxAttempts,
+            'max_attempts'       => $maxAttempts,
+            'usedAttempts'       => $usedAttempts,
+            'used_attempts'      => $usedAttempts,
+            'attempt_no'         => $usedAttempts,
+            'attemptNumber'      => $usedAttempts,
+            'remainingAttempts'  => $remainingAttempts,
+            'remaining_attempts' => $remainingAttempts,
+            'attempts_left'      => $remainingAttempts,
+            'passed'             => $score >= 5.0,
+            'saved_answers'      => $savedAnswers,
         ];
+    }
+
+    /**
+     * Truy vấn và chuẩn hóa tên thuộc tính câu hỏi của khóa học
+     */
+    private function getNormalizedQuestions(int $courseId)
+    {
+        if (!Schema::hasTable('questions')) {
+            return collect();
+        }
+
+        return DB::table('questions')
+            ->where('course_id', $courseId)
+            ->orderBy('id')
+            ->get()
+            ->map(function ($q) {
+                $text = $q->content ?? $q->question_text ?? $q->question ?? '';
+                $q->content = $text;
+                $q->question_text = $text;
+                $q->correct_answer = strtoupper((string) ($q->correct_answer ?? $q->correct_option ?? $q->answer ?? 'A'));
+                return $q;
+            });
     }
 }
