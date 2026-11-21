@@ -124,3 +124,19 @@ NHẬT KÝ SỬ DỤNG AI - NGUYỄN HOÀNG ANH VŨ (TV1 - LE)
 - **Kết quả AI phản hồi & Đánh giá:**
   > AI đã tích hợp phương thức `storeQuestions()` vào trong `DB::transaction` của `CourseController@store` (tự động nhận diện linh hoạt tên cột của bảng `questions` như `content`/`question_text`, `correct_answer`/`correct_option`) và thiết lập chuyển hướng sau khi tạo khóa học sang `route('teacher.questions.index', $courseId)`. Ngoài ra, AI bổ sung nút liên kết nhanh *"Quản lý đề thi trắc nghiệm →"* có kiểm tra điều kiện `Route::has('teacher.questions.index')` trên `teacher/courses/edit.blade.php` và hiển thị thông số `quiz_minutes` trên trang chi tiết khóa học `courses/show.blade.php`.
 - **Bài học rút ra:** Thiết kế luồng điều hướng liên hoàn từ tạo khóa học $\rightarrow$ thêm bài học $\rightarrow$ soạn câu hỏi trắc nghiệm giúp giảng viên hoàn thiện học liệu trọn vẹn trong một mạch thao tác, đồng thời kiểm tra tồn tại route trước khi hiển thị nút chuyển trang giúp tránh lỗi phát sinh khi ghép nhánh mã nguồn.
+
+## AI-13: uản lý đề thi & Xuất báo cáo CSV (Mốc 2 / v0.5)
+- **Thời gian:** 21/11/2026
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  1. *"giờ trang quản lý đề thi của vai trò giáo viên thì sẽ hiển thị gì http://127.0.0.1:8000/teacher/exams"*
+  2. *"thêm xuất CSV"*
+- **Kết quả AI phản hồi & Đánh giá:**
+ - **Định tuyến (`routes/web.php`):**
+  - Khai báo route `GET /teacher/exams` (`teacher.exams.index`) hiển thị trang tổng quan đề thi.
+  - Khai báo route `GET /teacher/exams/export` (`teacher.exams.export`) xử lý xuất tệp báo cáo CSV.
+- **Xử lý nghiệp vụ (`app/Http/Controllers/Teacher/ExamController.php`):**
+  - Hàm `index()`: Thống kê 4 chỉ số tổng quan (tổng số đề thi, tổng số câu hỏi, tổng lượt thi, tỷ lệ đạt $\ge 5.0$); tổng hợp trạng thái từng đề thi theo khóa học và danh sách lượt nộp bài gần đây có hỗ trợ lọc theo `course_id`.
+  - Hàm `export()`: Sử dụng `response()->streamDownload()` để xuất danh sách kết quả thi ra tệp `.csv` theo bộ lọc khóa học đang chọn, chèn mã **UTF-8 BOM (`\xEF\xBB\xBF`)** để hiển thị chuẩn tiếng Việt có dấu khi mở bằng Microsoft Excel.
+- **Giao diện (`resources/views/teacher/exams/index.blade.php`):**
+  - Xây dựng layout gồm 4 thẻ thống kê, bảng danh sách đề thi cuối khóa (kèm nút điều hướng nhanh sang trang *Soạn câu hỏi* và *Cài đặt*) và bảng kết quả thi của học viên tích hợp ô lọc khóa học cùng nút **Xuất CSV**.

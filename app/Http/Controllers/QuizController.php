@@ -47,7 +47,7 @@ class QuizController extends Controller
     /**
      * Xử lý nộp bài trắc nghiệm (HT-06)
      */
-    public function submit(Request $request, int $attemptId)
+public function submit(Request $request, int $attemptId)
     {
         $answers = $request->input('answers', []);
         if (!is_array($answers)) {
@@ -57,7 +57,6 @@ class QuizController extends Controller
         try {
             $result = $this->quizService->submit($attemptId, (int) Auth::id(), $answers);
 
-            // Lưu tạm đáp án học viên đã chọn vào session để đối chiếu trên trang kết quả
             session()->flash('submitted_answers_' . $attemptId, $answers);
 
             return redirect()
@@ -71,24 +70,25 @@ class QuizController extends Controller
                     ->with('error', $e->getMessage());
             }
 
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Lỗi nộp bài: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Hiển thị trang kết quả, đáp án đúng & số lượt còn lại (HT-06)
-     */
     public function result(int $attemptId)
     {
         try {
-            $data = $this->quizService->getResult((int) Auth::id(), $attemptId);
+            $data = $this->quizService->getResult($attemptId, (int) Auth::id());
             $data['user_answers'] = session('submitted_answers_' . $attemptId, []);
             return view('student.quiz.result', $data);
         } catch (Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()
+                ->route('courses.index')
+                ->with('error', 'Không thể hiển thị kết quả thi: ' . $e->getMessage());
         }
     }
-
     /**
      * Kiểm tra học viên đã hoàn thành 100% bài học của khóa chưa
      */
