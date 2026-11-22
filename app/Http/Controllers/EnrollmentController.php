@@ -21,7 +21,7 @@ class EnrollmentController extends Controller
             $this->enrollmentService->enroll(Auth::user(), $course);
 
             return redirect()
-                ->route('student.courses.index')
+                ->route('student.my-courses')
                 ->with('success', 'Ghi danh khóa học thành công!');
         } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
@@ -31,7 +31,8 @@ class EnrollmentController extends Controller
     public function myCourses(): View
     {
         $courses = $this->enrollmentService->getEnrolledCourses(Auth::user());
+        $viewName = view()->exists('student.my-courses') ? 'student.my-courses' : 'courses.my-courses';
 
-        return view('student.my-courses', compact('courses'));
+        return view($viewName, compact('courses'));
     }
 }
