@@ -90,7 +90,14 @@
                     </a>
                 </div>
             @endif
-
+            
+            {{-- 4. Phần hỏi đáp (nếu có) --}}
+            @if(isset($currentLesson) || isset($lesson))
+                @include('courses.partials.lesson-qa', [
+                    'lesson' => $currentLesson ?? $lesson,
+                    'course' => $course,
+                ])
+            @endif
             {{-- 4. Thanh công cụ dưới: Bài trước | Đánh dấu hoàn thành | Bài sau --}}
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 16px; border-top: 1px solid #eee;">
                 <div>

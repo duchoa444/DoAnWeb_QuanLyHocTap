@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\LessonCommentController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\StudentProfileController;
@@ -35,7 +36,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/courses/{course}/learn/{lesson?}', [CourseController::class, 'learn'])->name('courses.learn');
     Route::post('/courses/{course}/lessons/{lesson}/complete', [CourseController::class, 'completeLesson'])->name('lessons.complete');
 });
-
+// Bình luận bài học (HT-08)
+Route::middleware(['auth'])->group(function () {
+    Route::post('/lessons/{lesson}/comments', [LessonCommentController::class, 'store'])
+        ->name('lesson.comments.store');
+    Route::delete('/lesson-comments/{comment}', [LessonCommentController::class, 'destroy'])
+        ->name('lesson.comments.destroy');
+});
 // Phân hệ học viên (Student)
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/dashboard', fn () => 'Xin chào! Đây là trang học viên.');
@@ -59,7 +66,7 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/exam-history', [StudentProfileController::class, 'index'])->name('student.exam-history');
 });
 
-// Phân hệ giảng viên (HT-09 & HT-11)
+// Phân hệ giảng viên (HT-09, HT-11, HT-12, HT-08)
 Route::middleware(['auth', 'role:teacher'])
     ->prefix('teacher')
     ->name('teacher.')
@@ -82,13 +89,17 @@ Route::middleware(['auth', 'role:teacher'])
             ->name('questions.update');
         Route::delete('/courses/{course}/questions/{question}', [QuestionController::class, 'destroy'])
             ->name('questions.destroy');
-    });
-        // Quản lý đề thi
-        Route::get('/teacher/exams', [App\Http\Controllers\Teacher\ExamController::class, 'index'])
-    ->name('teacher.exams.index');
-    Route::get('/teacher/exams/export', [App\Http\Controllers\Teacher\ExamController::class, 'export'])
-    ->name('teacher.exams.export');
 
+        // Quản lý đề thi - HT-12
+        Route::get('/exams', [App\Http\Controllers\Teacher\ExamController::class, 'index'])
+            ->name('exams.index');
+        Route::get('/exams/export', [App\Http\Controllers\Teacher\ExamController::class, 'export'])
+            ->name('exams.export');
+
+        // Quản lý Hỏi đáp - HT-08
+        Route::get('/qna', [App\Http\Controllers\Teacher\QnaController::class, 'index'])
+            ->name('qna.index');
+    });
 // Phân hệ quản trị viên (Admin)
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
@@ -119,4 +130,5 @@ Route::middleware(['auth', 'role:admin'])
         // Quản lý danh mục
         Route::resource('categories', AdminCategoryController::class)
             ->only(['index', 'store', 'update', 'destroy']);
+        
     });

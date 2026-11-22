@@ -140,3 +140,16 @@ NHẬT KÝ SỬ DỤNG AI - NGUYỄN HOÀNG ANH VŨ (TV1 - LE)
   - Hàm `export()`: Sử dụng `response()->streamDownload()` để xuất danh sách kết quả thi ra tệp `.csv` theo bộ lọc khóa học đang chọn, chèn mã **UTF-8 BOM (`\xEF\xBB\xBF`)** để hiển thị chuẩn tiếng Việt có dấu khi mở bằng Microsoft Excel.
 - **Giao diện (`resources/views/teacher/exams/index.blade.php`):**
   - Xây dựng layout gồm 4 thẻ thống kê, bảng danh sách đề thi cuối khóa (kèm nút điều hướng nhanh sang trang *Soạn câu hỏi* và *Cài đặt*) và bảng kết quả thi của học viên tích hợp ô lọc khóa học cùng nút **Xuất CSV**.
+## AI-14: HT-08: hỏi đáp trong bài học
+- **Thời gian:** 22/11/2026
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  1. *"luồng xử lý khi vấn đáp của học viên mà giáo viên có thể thấy và trả lời"*
+- **Kết quả AI phản hồi & Đánh giá:**
+-Thiết kế migration create_lesson_comments_table (hỗ trợ parent_id tự tham chiếu cho luồng hội thoại 2 cấp) và Model LessonComment khai báo đầy đủ các quan hệ user(), lesson(), replies().
+
+-Xây dựng LessonCommentController (store, destroy) kiểm tra điều kiện ghi danh khóa học (enrollments), chuẩn hóa phản hồi về câu hỏi gốc 2 cấp và phân quyền xóa bình luận cho chủ sở hữu, giảng viên phụ trách khóa học hoặc admin.
+
+-Tạo component giao diện resources/views/courses/partials/lesson-qa.blade.php nhúng vào trang học bài (learn.blade.php), hiển thị nhãn Giảng viên cho các câu trả lời từ giáo viên.
+
+-Bổ sung trang tổng hợp hỏi đáp cho giáo viên (app/Http/Controllers/Teacher/QnaController.php và resources/views/teacher/qna/index.blade.php) cho phép đếm câu hỏi chờ giải đáp, lọc theo khóa học/trạng thái (Chưa trả lời, Đã trả lời) và phản hồi trực tiếp.

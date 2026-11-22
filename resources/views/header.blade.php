@@ -37,6 +37,7 @@
             @if(auth()->user()->role === 'teacher')
                 <a href="{{ url('/teacher/courses') }}" style="text-decoration: none; color: #333;">Quản lý giảng dạy</a>
                 <a href="{{ url('/teacher/exams') }}" style="text-decoration: none; color: #333;">Quản lý đề thi</a>
+                <a href="{{ route('teacher.qna.index') }}" style="text-decoration: none; color: #333;">Hỏi đáp</a>
             @endif
 
             {{-- Vai trò Quản trị viên (admin) --}}
