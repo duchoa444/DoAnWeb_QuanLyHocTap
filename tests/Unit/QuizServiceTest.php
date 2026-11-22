@@ -127,4 +127,66 @@ class QuizServiceTest extends TestCase
         $this->assertEquals(2.5, $result['score']);
         $this->assertEquals(1, $result['correct_count']);
     }
+
+    /**
+     * Ngày 10 - Unit test 1: Hết 3 lượt làm bài thì bị chặn
+     */
+    public function test_het_3_luot_lam_bai_bi_chan(): void
+    {
+        [$student, $courseId, $questionIds] = $this->seedQuizData(5);
+
+        // Thực hiện làm và nộp đủ 3 lượt
+        for ($i = 1; $i <= 3; $i++) {
+            $started = $this->quizService->start($student->id, $courseId);
+            $this->quizService->submit($started['attempt']->id, $student->id, [
+                $questionIds[0] => 'A',
+            ]);
+        }
+
+        // Lượt thứ 4 bắt buộc bị chặn
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Bạn đã sử dụng hết 3/3 lượt làm bài kiểm tra cho khóa học này.');
+
+        $this->quizService->start($student->id, $courseId);
+    }
+
+    /**
+     * Ngày 10 - Unit test 2: Hệ thống lấy điểm cao nhất qua các lần làm bài
+     */
+    public function test_lay_diem_cao_nhat_qua_cac_lan_lam(): void
+    {
+        [$student, $courseId, $questionIds] = $this->seedQuizData(10);
+
+        // Lượt 1: đúng 5/10 câu -> 5.0 điểm
+        $attempt1 = $this->quizService->start($student->id, $courseId)['attempt'];
+        $ans1 = [];
+        foreach ($questionIds as $idx => $qId) {
+            $ans1[$qId] = ($idx < 5) ? 'A' : 'B';
+        }
+        $this->quizService->submit($attempt1->id, $student->id, $ans1);
+
+        // Lượt 2: đúng 9/10 câu -> 9.0 điểm (điểm cao nhất)
+        $attempt2 = $this->quizService->start($student->id, $courseId)['attempt'];
+        $ans2 = [];
+        foreach ($questionIds as $idx => $qId) {
+            $ans2[$qId] = ($idx < 9) ? 'A' : 'B';
+        }
+        $this->quizService->submit($attempt2->id, $student->id, $ans2);
+
+        // Lượt 3: đúng 7/10 câu -> 7.0 điểm
+        $attempt3 = $this->quizService->start($student->id, $courseId)['attempt'];
+        $ans3 = [];
+        foreach ($questionIds as $idx => $qId) {
+            $ans3[$qId] = ($idx < 7) ? 'A' : 'B';
+        }
+        $this->quizService->submit($attempt3->id, $student->id, $ans3);
+
+        // Kiểm tra kết quả ở lượt 3 phải ghi nhận bestScore = 9.0
+        $result = $this->quizService->getResult($attempt3->id, $student->id);
+
+        $this->assertEquals(7.0, $result['score']);
+        $this->assertEquals(9.0, $result['bestScore']);
+        $this->assertEquals(3, $result['usedAttempts']);
+        $this->assertEquals(0, $result['remainingAttempts']);
+    }
 }

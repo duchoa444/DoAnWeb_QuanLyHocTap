@@ -141,6 +141,19 @@ class QuizService
         if ($attempt->submitted_at !== null) {
             throw new Exception('Lượt làm bài này đã được nộp trước đó.');
         }
+        // Kiểm tra quá thời gian làm bài (cộng 30 giây ân hạn trễ mạng)
+        $course = Course::find($attempt->course_id);
+        $quizMinutes = (int) ($course->quiz_minutes ?? 30);
+        if ($quizMinutes < 1) {
+            $quizMinutes = 30;
+        }
+        $startedAtRaw = $attempt->started_at ?? $attempt->created_at ?? null;
+        if ($startedAtRaw !== null) {
+            $deadline = Carbon::parse($startedAtRaw)->addMinutes($quizMinutes)->addSeconds(30);
+            if (now()->greaterThan($deadline)) {
+                throw new Exception('Đã quá thời gian làm bài quy định, bài nộp bị từ chối.');
+            }
+        }
 
         $questions = $this->getNormalizedQuestions((int) $attempt->course_id);
         $totalQuestions = $questions->count();
