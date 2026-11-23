@@ -41,3 +41,7 @@ php artisan serve
 ```
 
 Mở URL được hiển thị trong terminal. Trang chủ tự chuyển đến danh sách khóa học; danh sách lấy các khóa học đã xuất bản trong database. Chạy `php artisan test` để kiểm tra các luồng cơ bản.
+
+## Chạy kiểm thử tự động (Unit Test)
+```bash
+php artisan test
