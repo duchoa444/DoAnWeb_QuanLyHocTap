@@ -32,7 +32,6 @@
             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Vai trò đăng ký:</label>
             <select name="role" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                 <option value="student">Học viên</option>
-                <option value="teacher">Giảng viên</option>
             </select>
         </div>
 
