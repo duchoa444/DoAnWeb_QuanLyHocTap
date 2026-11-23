@@ -80,3 +80,19 @@
 - **Kiểm tra & Chỉnh sửa của thành viên:**
   - Đã đối chiếu tên cột khóa ngoại chủ sở hữu (`teacher_id` / `user_id`), cột thời gian làm bài (`quiz_minutes`) và tên các cột đáp án trong `database/migrations/` của nhóm để khớp với CSDL thực tế.
   - Đã kiểm thử thực tế trên trình duyệt: thêm/xóa câu hỏi, lưu số phút làm bài thành công và thử truy cập URL khóa học của giảng viên khác để xác nhận hệ thống chặn lỗi 403.
+
+  ## AI-07: Hoàn thiện % tiến độ học tập (HT-04) và giải quyết xung đột merge HT-11
+
+- **Thời gian:** 20/11/2026
+- **Công cụ AI:** Gemini
+- **Nhiệm vụ liên quan:** Giải quyết xung đột merge nhánh `feature/HT-11-cau-hoi` vào `develop`, cấu hình môi trường SQLite và lập trình tính năng hiển thị `% tiến độ` khóa học (`HT-04`) trên nhánh `feature/HT-04-tien-do`.
+- **Prompt đã sử dụng:**
+  > "Kiểm tra và gộp xung đột file routes/web.php khi merge nhánh feature/HT-11-cau-hoi vào develop, khắc phục lỗi cấu hình database SQLite, đồng thời viết logic tính phần trăm tiến độ khóa học (số bài đã hoàn thành / tổng số bài) trong Model Course và hiển thị thanh tiến độ tại trang Khóa học của tôi (HT-04)."
+- **Kết quả AI hỗ trợ:**
+  - Phát hiện lỗi trùng lặp cụm route và dư dấu đóng ngoặc trong file `routes/web.php`, đồng thời hướng dẫn cấu hình lại `.env` để Laravel kết nối đúng tới `database/database.sqlite`.
+  - Sinh phương thức `getProgressStats(?int $userId)` trong `app/Models/Course.php` tính tỷ lệ hoàn thành theo công thức `số bài đã hoàn thành / tổng số bài` và cập nhật giao diện thanh tiến độ (`%`) tại `resources/views/courses/my-courses.blade.php`.
+  - Sửa lỗi lệch tên route `student.my-courses` và đường dẫn view `courses.my-courses` trong `app/Http/Controllers/EnrollmentController.php`.
+- **Kiểm tra & Chỉnh sửa của thành viên:**
+  - Đã rà soát toàn bộ route trong `routes/web.php` khớp với các phân hệ học viên, giảng viên (`HT-11`), quản trị viên và hoàn tất merge PR #36 vào `develop`.
+  - Bổ sung điều kiện kiểm tra `Schema::hasTable('lesson_progress')` và trường hợp khóa học có `0` bài học để tránh lỗi chia cho 0 hoặc lỗi thiếu bảng khi nhánh `HT-05` chưa merge.
+  - Đã kiểm thử thực tế trên trình duyệt tại đường dẫn `/my-courses` với tài khoản học viên để xác nhận thanh tiến độ hiển thị chính xác trước khi tạo PR.
