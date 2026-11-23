@@ -112,3 +112,9 @@
 - **Kiểm chứng & Chỉnh sửa thủ công:**
   - Đối chiếu file `routes/web.php` hiện có của nhóm và bổ sung 2 route GET (`quiz.take`, `quiz.result`) mà không làm thay đổi tên route `POST` (`quiz.start`, `quiz.submit`) đã gắn sẵn.
   - Chạy kiểm thử thực tế trên trình duyệt toàn bộ luồng: đăng nhập học viên $\rightarrow$ vào làm bài $\rightarrow$ kiểm tra mã nguồn HTML không lộ đáp án $\rightarrow$ nộp bài $\rightarrow$ xem điểm, đáp án đúng và số lượt còn lại $\rightarrow$ kiểm tra chặn ở lượt thứ 4.
+
+## Ngày 10 – Thứ 6, tuần 2 (Mốc 2 – Demo & Unit Test HT-06)
+- **Mục tiêu:** Demo Mốc 2 tính năng `HT-06` và viết ≥ 2 Unit Test cho `QuizService` trên nhánh `test/HT-06` (chặn khi hết 3 lượt làm bài và lấy điểm cao nhất).
+- **Sử dụng AI:**
+  - *Prompt:* Nhờ AI hỗ trợ hoàn thiện bộ Unit Test PHPUnit (`tests/Unit/QuizServiceTest.php`) kiểm tra kịch bản chặn học viên khi làm đủ 3 lượt (`test_het_3_luot_lam_bai_bi_chan`), truy xuất điểm cao nhất (`test_lay_diem_cao_nhat_qua_cac_lan_lam`) và kiểm tra ràng buộc quá thời gian nộp bài trong `QuizService.php`.
+  - *Kiểm chứng & Chỉnh sửa:* Tự đối chiếu tên phương thức (`start`, `submit`, `getResult`) và cấu trúc dữ liệu của `QuizService.php`, chạy lệnh `php artisan test --filter=QuizServiceTest` xác nhận toàn bộ 5/5 test case (13 assertions) đạt trạng thái PASS.

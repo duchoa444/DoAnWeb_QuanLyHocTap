@@ -71,3 +71,13 @@
 - *Prompt:* "Hỗ trợ cập nhật giao diện trang chi tiết khóa học `resources/views/courses/show.blade.php` để điều hướng sang trang học bài (`courses.learn`), xử lý tình huống khi nhánh ghi danh `HT-04` chưa merge vào nhánh hiện tại và kiểm thử toàn diện luồng truy cập trái phép (HT-NFR2) cũng như luồng học bài chính thức."
 - *Kết quả AI phản hồi & Đánh giá:* AI hướng dẫn kiểm tra điều kiện `$canLearn` (đã ghi danh, giảng viên của khóa hoặc admin) để hiển thị nút **Vào học** hoặc **Ghi danh khóa học**, đồng thời bổ sung kịch bản kiểm thử chặn quyền truy cập khi chưa ghi danh (`403`/redirect kèm thông báo lỗi) và dọn sạch route ghi danh tạm trước khi đẩy code lên Pull Request.
 - *Bài học rút ra:* Sử dụng `Route::has()` trong Blade view giúp giao diện hoạt động an toàn ngay cả khi các tính năng liên quan (`HT-04`) đang được phát triển song song ở nhánh khác, tránh phát sinh lỗi giao diện khi tích hợp.
+
+## AI-09: Rà soát lỗi hiển thị giao diện học bài (`learn.blade.php`) trên màn hình Mobile 360px
+- **Thời gian:** 19:30 – 20:00 (Chủ nhật, 22/11/2026 – Ngày 09, Tuần 2)
+- **Công cụ AI:** Gemini
+- **Prompt:**
+  > "Rà soát giúp tôi code trang học bài `resources/views/courses/learn.blade.php` để tìm các lỗi tràn ngang và vỡ bố cục khi hiển thị trên màn hình điện thoại chiều rộng 360px."
+- **Kết quả AI phản hồi & Đánh giá:**
+  - **Gợi ý giữ lại:** AI chỉ ra chính xác 3 nguyên nhân gây lỗi trên khung 360px: (1) cột nội dung bài học đặt `min-width: 320px` khiến khung bị ép sát và dễ tràn ngang khi có padding/iframe; (2) khung video YouTube cố định `height: 400px` làm sai tỉ lệ khung hình trên mobile; (3) nút `Làm bài trắc nghiệm` ở cuối file chưa có container căn lề nên bị dính sát mép trái màn hình.
+  - **Gợi ý loại bỏ:** Không cần cài thêm thư viện CSS ngoài (Bootstrap/Tailwind) để tránh xung đột với inline CSS hiện có của toàn bộ dự án.
+- **Bài học rút ra:** Khi làm bố cục Flexbox 2 cột responsive, cột nội dung chính nên đặt `min-width: 0; width: 100%; box-sizing: border-box;` thay vì cố định `min-width` bằng pixel lớn.

@@ -14,7 +14,7 @@
 
 <div style="max-width: 1200px; margin: 20px auto; padding: 0 20px;">
     {{-- Thanh điều hướng trên cùng --}}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
         <a href="{{ route('courses.show', $course->id) }}" style="color: #007bff; text-decoration: none; font-weight: bold;">
             &larr; Quay lại chi tiết khóa học: {{ $course->title }}
         </a>
@@ -57,14 +57,14 @@
         </div>
 
         {{-- CỘT PHẢI: Nội dung bài học hiện tại --}}
-        <div style="flex: 2.3; min-width: 320px; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 24px;">
+        <div style="flex: 2.3; min-width: 0; width: 100%; box-sizing: border-box; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 24px;">
             <h2 style="margin: 0 0 16px 0; font-size: 22px;">{{ $currentLesson->title }}</h2>
 
             {{-- 1. Video nhúng (nếu có) --}}
             @if($embedUrl)
                 <div style="margin-bottom: 20px; background: #000; border-radius: 6px; overflow: hidden;">
                     @if(str_contains($embedUrl, 'youtube.com/embed') || str_contains($embedUrl, 'vimeo.com'))
-                        <iframe src="{{ $embedUrl }}" style="width: 100%; height: 400px; border: none;" allowfullscreen></iframe>
+                        <iframe src="{{ $embedUrl }}" style="width: 100%; aspect-ratio: 16 / 9; height: auto; border: none;" allowfullscreen></iframe>
                     @else
                         <video controls style="width: 100%; max-height: 400px;">
                             <source src="{{ asset($embedUrl) }}" type="video/mp4">
@@ -143,7 +143,7 @@
     $completedCount = count($completedLessonIds ?? []);
     $canTakeQuiz = $totalLessons > 0 && $completedCount >= $totalLessons;
 @endphp
-
+<div style="max-width: 1200px; margin: 0 auto 24px auto; padding: 0 20px;">
 @if($canTakeQuiz)
     <form action="{{ route('quiz.start', $course->id) }}" method="POST" style="display: inline;">
         @csrf
@@ -157,4 +157,5 @@
         Làm bài trắc nghiệm (Hoàn thành {{ $completedCount }}/{{ $totalLessons }} bài để mở khóa)
     </button>
 @endif
+</div>
 @include('footer')
