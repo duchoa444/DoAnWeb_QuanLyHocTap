@@ -96,3 +96,35 @@
   - Đã rà soát toàn bộ route trong `routes/web.php` khớp với các phân hệ học viên, giảng viên (`HT-11`), quản trị viên và hoàn tất merge PR #36 vào `develop`.
   - Bổ sung điều kiện kiểm tra `Schema::hasTable('lesson_progress')` và trường hợp khóa học có `0` bài học để tránh lỗi chia cho 0 hoặc lỗi thiếu bảng khi nhánh `HT-05` chưa merge.
   - Đã kiểm thử thực tế trên trình duyệt tại đường dẫn `/my-courses` với tài khoản học viên để xác nhận thanh tiến độ hiển thị chính xác trước khi tạo PR.
+
+  ---
+
+## AI-08: Bổ sung kịch bản kiểm thử (HT-04, HT-05, HT-06, HT-11) và kịch bản Smoke Test trước Mốc 2
+
+- **Thời gian:** 20/11/2026
+- **Công cụ AI:** Gemini
+- **Nhiệm vụ liên quan:** Bổ sung bộ test case cho các chức năng `HT-04`, `HT-05`, `HT-06`, `HT-11` vào file `docs/test-cases.md`, rà soát merge PR trước 21:00 và lập kịch bản chạy Smoke Test kiểm chứng bảo mật (`HT-NFR1`, `HT-NFR2`, `HT-NFR3`) trên nhánh `develop`[cite: 2, 4].
+- **Prompt đã sử dụng:**
+  > "Viết bổ sung các kịch bản kiểm thử (test cases) theo đúng định dạng bảng 6 cột của dự án cho các chức năng HT-04, HT-05, HT-06, HT-11 và lập danh sách các bước chạy Smoke Test kèm kiểm chứng bảo mật HT-NFR1, HT-NFR2, HT-NFR3 trên nhánh develop."
+- **Kết quả AI hỗ trợ:**
+  - Sinh các kịch bản kiểm thử bao phủ luồng ghi danh và tính `% tiến độ` (`HT-04`), học bài và bảo vệ tệp PDF khi chưa ghi danh (`HT-05`, `HT-NFR2`), chống lộ đáp án qua Network / nộp quá giờ / giới hạn 3 lượt thi (`HT-06`, `HT-NFR1`) và kiểm tra quyền sở hữu khóa học khi sửa câu hỏi (`HT-11`, `HT-NFR3`).
+  - Đề xuất trình tự chạy Smoke Test xuyên suốt luồng học viên (đăng nhập $\rightarrow$ ghi danh $\rightarrow$ học bài $\rightarrow$ kiểm tra `% tiến độ` $\rightarrow$ làm bài trắc nghiệm $\rightarrow$ xem lịch sử điểm) phục vụ buổi demo thử[cite: 2].
+- **Kiểm tra & Chỉnh sửa của thành viên:**
+  - Đã đối chiếu tên đường dẫn (`/my-courses`, `/courses/{id}/learn`), tên bảng (`enrollments`, `lesson_progress`) và tên cột (`quiz_minutes`, `teacher_id`) cho khớp 100% với mã nguồn thực tế trên nhánh `develop`.
+  - Đã duyệt và merge các Pull Request hoàn thành vào `develop`, xóa nhánh phụ để không tồn đọng PR treo và chạy kiểm thử thực tế các quy tắc phân quyền, chống gian lận[cite: 4, 5].
+
+---
+
+## AI-09: Viết Unit Test chức năng Ghi danh (HT-04) và tổng hợp 35 Test Cases cho 12 chức năng
+
+- **Thời gian:** 20/11/2026
+- **Công cụ AI:** Gemini
+- **Nhiệm vụ liên quan:** Viết unit test cho `EnrollmentService` trên nhánh `test/HT-04`, hoàn thiện bảng kịch bản kiểm thử đủ 12 chức năng bắt buộc trong `docs/test-cases.md`, cập nhật hướng dẫn chạy test vào `README.md` và gắn tag `v0.5` cho Mốc 2[cite: 8, 9].
+- **Prompt đã sử dụng:**
+  > "Viết unit test bằng PHPUnit trong Laravel 12 cho EnrollmentService (kiểm tra ghi danh hợp lệ và chặn ghi danh trùng lần 2), đồng thời gộp và định dạng lại file docs/test-cases.md thành một bảng tổng hợp đủ 12 chức năng bắt buộc (HT-01 đến HT-15) theo cấu trúc 6 cột."
+- **Kết quả AI hỗ trợ:**
+  - Sinh lớp `Tests\Unit\EnrollmentServiceTest` sử dụng `RefreshDatabase` với 2 phương thức kiểm thử: ghi danh thành công khóa học `published` và ném ngoại lệ `Exception` khi học viên ghi danh trùng lần 2.
+  - Tổng hợp và chuẩn hóa 35 kịch bản kiểm thử (`TC-01` đến `TC-35`) bao phủ toàn bộ 12 chức năng bắt buộc và 3 yêu cầu bảo mật (`HT-NFR1`, `HT-NFR2`, `HT-NFR3`) vào một bảng thống nhất dễ theo dõi.
+- **Kiểm tra & Chỉnh sửa của thành viên:**
+  - Đã đối chiếu các trường dữ liệu khởi tạo (`category_id`, `teacher_id`, `quiz_minutes`, `status`) trong `EnrollmentServiceTest` cho khớp với migration thực tế và chạy `php artisan test` xác nhận toàn bộ test case đều đạt (Pass).
+  - Đã bổ sung lệnh `php artisan test` vào `README.md`, merge nhánh `test/HT-04` vào `develop` và gắn tag `v0.5` trên GitHub[cite: 8, 9].
