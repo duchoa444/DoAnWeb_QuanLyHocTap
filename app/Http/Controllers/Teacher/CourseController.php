@@ -44,7 +44,7 @@ class CourseController extends Controller
             'title'        => 'required|string|max:255',
             'description'  => 'nullable|string',
             'status'       => 'nullable|in:draft,pending,published',
-            'thumbnail'    => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'thumbnail'    => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'quiz_minutes' => 'required|integer|min:1|max:180',
             'max_attempts' => 'nullable|integer|min:1|max:20',
             'lessons'      => 'nullable|array',
