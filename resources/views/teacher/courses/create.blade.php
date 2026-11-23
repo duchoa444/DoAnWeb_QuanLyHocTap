@@ -52,7 +52,7 @@
                 <label style="display: block; font-weight: bold; margin-bottom: 6px;">Ảnh bìa khóa học</label>
                 <input type="file" name="thumbnail" accept="image/*" onchange="previewThumbnail(event)"
                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fafafa;">
-                <small style="color: #666; display: block; margin-top: 4px;">Định dạng hỗ trợ: JPG, PNG, GIF, WEBP (tối đa 2MB).</small>
+                <small style="color: #666; display: block; margin-top: 4px;">Định dạng hỗ trợ: JPG, PNG, GIF, WEBP (tối đa 5MB).</small>
                 <div id="thumbnail-preview-wrap" style="display: none; margin-top: 10px;">
                     <img id="thumbnail-preview" src="" alt="Xem trước ảnh bìa"
                          style="max-width: 280px; max-height: 160px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
