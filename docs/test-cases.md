@@ -1,105 +1,44 @@
 # Danh sách Kịch bản Kiểm thử (Test Cases)
 
 ## 1. Quy ước chung
-- **Trạng thái**: Pass / Fail / Pending
-- **Môi trường kiểm thử**: Localhost (Chrome / Edge)
+- **Trạng thái:** `Pass` / `Fail` / `Pending`
+- **Môi trường kiểm thử:** Localhost — Laravel 12, SQLite (Chrome / Edge)
+- **Độ phủ kiểm thử:** Đủ 12 chức năng bắt buộc (`HT-01`–`HT-07`, `HT-09`–`HT-11`, `HT-14`–`HT-15`), 2 chức năng cộng điểm (`HT-08`, `HT-12`)[cite: 15, 16, 17] và 4 yêu cầu phi chức năng đặc thù (`HT-NFR1`–`HT-NFR4`)[cite: 17]. *(Không thực hiện `HT-13`, `HT-16`)*.
 
-## 2. Bảng Test Cases Mẫu (Chức năng HT-06: Làm bài trắc nghiệm)
+---
 
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
+## 2. Bảng tổng hợp Kịch bản Kiểm thử (Theo Đặc tả E2 & E3)
+
+| ID | Mã chức năng | Bước thực hiện | Dữ liệu đầu vào | Kết quả mong đợi | Kết quả thực tế |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-01 | HT-06 | 1. Đăng nhập tài khoản Học viên.<br>2. Vào khóa học đã ghi danh và bấm "Làm bài trắc nghiệm".<br>3. Chọn đủ đáp án và bấm "Nộp bài" trước khi hết giờ. | Tài khoản: `hv1@test.com`<br>Đáp án đúng: 8/10 câu | Hệ thống lưu lượt làm bài, chấm điểm tự động (8/10) và hiển thị kết quả ngay lập tức. | Pending |
-| TC-02 | HT-06 | 1. Bắt đầu làm bài trắc nghiệm.<br>2. Không chọn đáp án cho 3 câu hỏi.<br>3. Bấm "Nộp bài". | Bỏ trống câu 2, 5, 9.<br>Các câu còn lại đúng hết. | Hệ thống hiển thị cảnh báo xác nhận nộp bài khi còn câu trống; nếu xác nhận, các câu trống tính 0 điểm (tổng 7/10). | Pending |
-| TC-03 | HT-06 | 1. Bắt đầu làm bài (thời gian `quiz_minutes` = 15 phút).<br>2. Để đồng hồ đếm ngược về `00:00` mà chưa bấm nộp. | Thời gian làm bài hết hạn | Hệ thống tự động khóa chọn đáp án và tự động nộp bài với các đáp án đã chọn trước đó. | Pending |
-| TC-04 | HT-06 | 1. Bắt đầu làm bài.<br>2. Can thiệp API hoặc gửi request nộp bài sau khi thời gian làm bài đã kết thúc quá thời gian cho phép. | Request nộp bài trễ hơn thời điểm bắt đầu + `quiz_minutes` | Backend từ chối ghi nhận điểm mới hoặc đánh dấu bài nộp trễ không hợp lệ theo quy định. | Pending |
-| TC-05 | HT-06 | 1. Học viên đã làm hết số lượt tối đa cho phép của bài kiểm tra.<br>2. Truy cập lại trang bài trắc nghiệm và bấm "Làm lại". | Tài khoản đã hết lượt làm bài | Nút "Làm bài" bị vô hiệu hóa (disabled) và hiển thị thông báo "Bạn đã hết lượt làm bài". | Pending |
-
-## 3. Bảng Test Cases (Chức năng HT-03: Đăng ký tài khoản học viên)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-06 | HT-03 | 1. Truy cập trang `/register`.<br>2. Nhập đầy đủ họ tên, email chưa tồn tại, mật khẩu hợp lệ và xác nhận mật khẩu.<br>3. Bấm "Đăng ký". | Tên: `Nguyễn Văn A`<br>Email: `sv_moi@example.com`<br>Pass: `12345678` | Tạo tài khoản thành công với vai trò mặc định là `student`, mật khẩu được băm (hash) trong CSDL và chuyển hướng đăng nhập thành công. | Pending |
-| TC-07 | HT-03 | 1. Truy cập trang `/register`.<br>2. Nhập email đã tồn tại trong hệ thống.<br>3. Bấm "Đăng ký". | Email: `teacher01@example.com`<br>Pass: `12345678` | Hệ thống từ chối tạo tài khoản và hiển thị thông báo lỗi bằng tiếng Việt (VD: "Email đã được sử dụng"). | Pending |
-| TC-08 | HT-03 | 1. Truy cập trang `/register`.<br>2. Nhập mật khẩu ngắn hơn quy định (dưới 8 ký tự) hoặc mật khẩu xác nhận không khớp.<br>3. Bấm "Đăng ký". | Email: `sv2@example.com`<br>Pass: `123` | Form báo lỗi validate bằng tiếng Việt, không lưu dữ liệu vào CSDL. | Pending |
-| TC-09 | HT-03 | 1. Truy cập trang `/register`.<br>2. Bỏ trống các trường bắt buộc hoặc nhập sai định dạng email.<br>3. Bấm "Đăng ký". | Email: `khongphaiemail`<br>Tên: *(trống)* | Hệ thống chặn submit và hiển thị thông báo lỗi tiếng Việt tương ứng từng trường. | Pending |
-| TC-10 | HT-03 | 1. Gửi request POST tới route đăng ký kèm tham số giả mạo quyền quản trị (`role=admin` hoặc `role=teacher`). | Payload chứa `role: "admin"` | Backend bỏ qua tham số `role` gửi lên, chỉ tạo tài khoản với vai trò `student`. | Pending |
-
-## 4. Bảng Test Cases (Chức năng HT-04: Ghi danh và % tiến độ học tập)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-11 | HT-04 | 1. Đăng nhập tài khoản Học viên.<br>2. Truy cập chi tiết khóa học có trạng thái `published` và bấm "Ghi danh".<br>3. Quay lại trang khóa học đó và bấm "Ghi danh" lần thứ 2. | Tài khoản: `hv1@test.com`<br>Khóa học: `published` | Lần 1 ghi danh thành công và chuyển hướng về `/my-courses`; lần 2 bị chặn, báo đã ghi danh và không tạo bản ghi trùng trong bảng `enrollments`. | Pending |
-| TC-12 | HT-04 | 1. Đăng nhập Học viên đã ghi danh khóa học có 4 bài học.<br>2. Hoàn thành 2/4 bài học.<br>3. Mở trang "Khóa học của tôi" (`/my-courses`). | `completed = 2`<br>`total = 4` | Hiển thị đúng tỷ lệ `2/4 bài` và thanh tiến độ đạt `50%`. | Pending |
-| TC-13 | HT-04 | 1. Đăng nhập Học viên đã ghi danh khóa học mới tạo chưa có bài học nào.<br>2. Mở trang "Khóa học của tôi" (`/my-courses`). | `completed = 0`<br>`total = 0` | Hiển thị `0/0 bài` và thanh tiến độ `0%`, hệ thống không phát sinh lỗi chia cho 0 (`DivisionByZeroError`). | Pending |
-
-## 5. Bảng Test Cases (Chức năng HT-05: Học bài và bảo vệ tài liệu HT-NFR2)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-14 | HT-05 | 1. Đăng nhập Học viên đã ghi danh khóa học.<br>2. Mở trang học bài, xem nội dung video/PDF và bấm nút "Đánh dấu hoàn thành".<br>3. Bấm "Đánh dấu hoàn thành" thêm lần nữa. | Tài khoản: `hv1@test.com`<br>Bài học thuộc khóa đã ghi danh | Giao diện hiển thị danh sách bài bên trái, nội dung bên phải; ghi nhận 1 bản ghi hoàn thành vào `lesson_progress`, bấm lại không tạo dữ liệu trùng lặp. | Pending |
-| TC-15 | HT-05 (HT-NFR2) | 1. Đăng nhập Học viên **chưa ghi danh** khóa học.<br>2. Nhập trực tiếp URL trang học bài của khóa học đó lên thanh địa chỉ trình duyệt. | Tài khoản chưa ghi danh<br>URL học bài của khóa học | Server từ chối truy cập (trả về lỗi 403 hoặc chuyển hướng kèm thông báo yêu cầu ghi danh trước khi học). | Pending |
-| TC-16 | HT-05 (HT-NFR2) | 1. Đăng nhập Học viên **chưa ghi danh** khóa học.<br>2. Truy cập trực tiếp đường dẫn tải tệp PDF đính kèm trong bài học. | Tài khoản chưa ghi danh<br>URL route tải PDF | Server chặn tải tệp (trả về lỗi 403), chỉ cho phép học viên đã ghi danh hoặc giảng viên sở hữu khóa học tải về. | Pending |
-
-## 6. Bảng Test Cases Bổ sung (Chức năng HT-06: Kiểm chứng chống gian lận HT-NFR1)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-17 | HT-06 (HT-NFR1) | 1. Bắt đầu làm bài trắc nghiệm.<br>2. Mở DevTools (`F12`) $\rightarrow$ chọn tab **Network** và kiểm tra dữ liệu phản hồi (Response) tải danh sách câu hỏi. | Phiên làm bài trắc nghiệm đang diễn ra | Dữ liệu trả về từ server chỉ chứa nội dung câu hỏi và 4 lựa chọn A/B/C/D, tuyệt đối không chứa trường đáp án đúng (`correct_option`). | Pending |
-| TC-18 | HT-06 (HT-NFR1) | 1. Bắt đầu làm bài (thời gian `quiz_minutes` = 15 phút).<br>2. Chỉnh đồng hồ hệ thống trên máy tính chạy lùi/tiến vượt quá thời hạn rồi bấm "Nộp bài".<br>3. Thử bắt đầu lượt làm bài thứ 4 (khi giới hạn tối đa là 3 lượt). | Đồng hồ máy bị chỉnh sai lệch; số lượt đã làm = 3 | Server đối chiếu thời gian thực trên máy chủ để từ chối bài nộp quá hạn và chặn không cho tạo lượt làm bài thứ 4. | Pending |
-
-## 7. Bảng Test Cases (Chức năng HT-11: Quản lý câu hỏi trắc nghiệm và HT-NFR3)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-19 | HT-11 | 1. Đăng nhập tài khoản Giảng viên.<br>2. Vào quản lý câu hỏi của khóa học thuộc sở hữu, nhập câu hỏi mới kèm 4 đáp án A, B, C, D, chọn đáp án đúng và bấm "Lưu".<br>3. Cập nhật thời gian làm bài (`quiz_minutes`) thành `20` phút. | Nội dung câu hỏi hợp lệ; `correct_option = B`; `quiz_minutes = 20` | Thêm câu hỏi thành công vào danh sách hiển thị; thời gian làm bài của khóa học được cập nhật thành 20 phút. | Pending |
-| TC-20 | HT-11 | 1. Tại form thêm câu hỏi, bỏ trống nội dung câu hỏi hoặc thiếu 1 trong 4 đáp án A, B, C, D.<br>2. Bấm "Lưu". | `content`: *(trống)*<br>`option_c`: *(trống)* | Hệ thống chặn lưu dữ liệu và hiển thị thông báo lỗi validate rõ ràng bằng tiếng Việt. | Pending |
-| TC-21 | HT-11 (HT-NFR3) | 1. Đăng nhập **Giảng viên A**.<br>2. Thay đổi ID khóa học hoặc ID câu hỏi trên URL/Request sang khóa học thuộc quyền sở hữu của **Giảng viên B** để xem, sửa hoặc xóa. | Tài khoản: `gvA@test.com`<br>ID khóa học thuộc `gvB@test.com` | Server kiểm tra quyền sở hữu (`teacher_id`) và chặn thao tác trái phép với mã lỗi `403 Forbidden`. | Pending |
-
-## 8. Bảng Test Cases (Chức năng HT-01: Đăng nhập và Đăng xuất)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-22 | HT-01 | 1. Truy cập `/login`.<br>2. Nhập đúng email và mật khẩu của tài khoản đang hoạt động (`is_active = true`).<br>3. Bấm "Đăng nhập", sau đó bấm "Đăng xuất". | Email: `hv1@test.com`<br>Pass: `12345678` | Đăng nhập thành công, chuyển hướng đúng trang theo vai trò; khi bấm Đăng xuất thì hủy phiên và quay về trang đăng nhập/khóa học. | Pending |
-| TC-23 | HT-01 | 1. Truy cập `/login`.<br>2. Nhập sai mật khẩu hoặc đăng nhập bằng tài khoản đã bị quản trị viên khóa (`is_active = false`).<br>3. Bấm "Đăng nhập". | Email: `locked@test.com`<br>Pass: `12345678` | Từ chối đăng nhập và hiển thị thông báo lỗi bằng tiếng Việt (sai thông tin hoặc tài khoản đã bị khóa). | Pending |
-
-## 9. Bảng Test Cases (Chức năng HT-02: Xem danh sách và tìm kiếm khóa học)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-24 | HT-02 | 1. Truy cập trang `/courses`.<br>2. Quan sát danh sách khóa học hiển thị. | Khóa học `published` và khóa học `hidden`/`pending` | Chỉ hiển thị các khóa học ở trạng thái công khai (`published`), không hiển thị khóa học bị ẩn hoặc chờ duyệt. | Pending |
-| TC-25 | HT-02 | 1. Tại trang `/courses`, nhập từ khóa tìm kiếm hoặc chọn lọc theo danh mục.<br>2. Bấm vào một khóa học để xem trang chi tiết (`/courses/{id}`). | Từ khóa: `Laravel`<br>Danh mục: `Lập trình Web` | Lọc đúng danh sách khóa học khớp từ khóa/danh mục; trang chi tiết hiển thị đầy đủ mô tả, giảng viên và danh sách bài học. | Pending |
-
-## 10. Bảng Test Cases (Chức năng HT-07: Hồ sơ cá nhân và lịch sử điểm)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-26 | HT-07 | 1. Đăng nhập tài khoản Học viên, truy cập `/profile`.<br>2. Cập nhật họ tên mới và đổi mật khẩu (nhập đúng mật khẩu cũ, mật khẩu mới hợp lệ). | Tên mới: `Nguyễn Thành Nhân`<br>Pass cũ đúng, Pass mới: `87654321` | Cập nhật thông tin và mật khẩu thành công, hiển thị thông báo xác nhận. | Pending |
-| TC-27 | HT-07 | 1. Truy cập `/exam-history` (hoặc mục Lịch sử thi trong hồ sơ).<br>2. Quan sát danh sách các lần làm bài trắc nghiệm. | Tài khoản đã có 2 lượt nộp bài trắc nghiệm | Hiển thị đầy đủ tên khóa học, điểm số từng lần thi, thời gian nộp và điểm cao nhất đạt được. | Pending |
-
-## 11. Bảng Test Cases (Chức năng HT-09: Giảng viên quản lý khóa học)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-28 | HT-09 | 1. Đăng nhập tài khoản Giảng viên, vào `/teacher/courses`.<br>2. Bấm "Tạo khóa học", nhập tiêu đề, mô tả, chọn danh mục và lưu. | Tiêu đề: `Lập trình PHP cơ bản`<br>Danh mục hợp lệ | Tạo khóa học mới thành công gắn với `teacher_id` của giảng viên hiện tại. | Pending |
-| TC-29 | HT-09 | 1. Giảng viên A đổi ID trên URL `/teacher/courses/{id}/edit` sang khóa học thuộc Giảng viên B.<br>2. Gửi yêu cầu sửa hoặc xóa. | Tài khoản Giảng viên A, ID khóa học của Giảng viên B | Hệ thống chặn thao tác trái phép với lỗi `403 Forbidden`. | Pending |
-
-## 12. Bảng Test Cases (Chức năng HT-10: Giảng viên quản lý bài học và tệp PDF)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-30 | HT-10 | 1. Tại khóa học của mình, giảng viên thêm bài học mới kèm liên kết video và tải lên tệp tài liệu `.pdf` hợp lệ. | Tiêu đề bài học, URL video, file `tailieu.pdf` (< 10MB) | Lưu bài học và tệp PDF thành công vào thư mục lưu trữ bảo vệ của hệ thống. | Pending |
-| TC-31 | HT-10 | 1. Tại form thêm/sửa bài học, bỏ trống tiêu đề hoặc tải lên tệp không đúng định dạng `.pdf` (VD: `.exe`). | File: `script.exe` | Backend từ chối lưu và hiển thị thông báo lỗi validate định dạng tệp bằng tiếng Việt. | Pending |
-
-## 13. Bảng Test Cases (Chức năng HT-14: Quản trị tài khoản và danh mục)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-32 | HT-14 | 1. Đăng nhập tài khoản Admin, vào `/admin/users`.<br>2. Bấm nút khóa/mở khóa trạng thái (`toggle-status`) của một tài khoản học viên/giảng viên. | Tài khoản `admin@test.com`<br>User mục tiêu: `hv1@test.com` | Trạng thái `is_active` được cập nhật thành công; tài khoản bị khóa không thể đăng nhập. | Pending |
-| TC-33 | HT-14 | 1. Vào `/admin/categories`, thêm mới một danh mục khóa học, sau đó sửa tên danh mục đó. | Tên danh mục: `Cơ sở dữ liệu` | Thêm và cập nhật danh mục thành công, hiển thị ngay trong danh sách chọn khi tạo khóa học. | Pending |
-
-## 14. Bảng Test Cases (Chức năng HT-15: Quản trị duyệt và ẩn khóa học vi phạm)
-
-| ID | Mã chức năng | Bước | Dữ liệu | Kết quả mong đợi | Kết quả thực tế |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| TC-34 | HT-15 | 1. Đăng nhập Admin, vào `/admin/courses`.<br>2. Bấm "Duyệt" (`approve`) một khóa học đang chờ duyệt. | Khóa học trạng thái `pending` | Khóa học chuyển sang trạng thái `published` và xuất hiện công khai tại trang `/courses`. | Pending |
-| TC-35 | HT-15 | 1. Tại `/admin/courses`, bấm "Ẩn" (`hide`) một khóa học đang công khai vi phạm nội dung.<br>2. Mở trang `/courses` bằng tài khoản khách/học viên. | Khóa học trạng thái `published` | Khóa học chuyển sang trạng thái `hidden` và biến mất khỏi danh sách khóa học công khai. | Pending |
+| TC-01 | **HT-01**<br>*(Danh sách khóa học)* | 1. Truy cập `/courses` (chưa đăng nhập).<br>2. Tìm theo tên khóa học, lọc theo danh mục và giảng viên.<br>3. Chuyển trang bằng thanh phân trang. | Từ khóa: `Laravel`<br>Danh mục: `Lập trình Web` | Lọc đúng danh sách khóa công khai (`published`) khớp tên/danh mục/giảng viên; phân trang phía server hoạt động chính xác[cite: 15]. | Pending |
+| TC-02 | **HT-01**<br>*(Danh sách khóa học)* | 1. Truy cập `/courses`.<br>2. Quan sát các khóa học đang ở trạng thái nháp (`draft`/`pending`) hoặc bị ẩn (`hidden`). | Khóa `draft` và khóa `hidden` | Không hiển thị khóa học nháp hoặc khóa học vi phạm bị ẩn ra danh sách công khai[cite: 15]. | Pending |
+| TC-03 | **HT-02**<br>*(Chi tiết khóa học)* | 1. Bấm vào một khóa học công khai để mở `/courses/{id}`.<br>2. Kiểm tra thông tin hiển thị trên trang. | Khóa học `published` có 5 bài học và 10 học viên | Hiển thị đủ mô tả, tên giảng viên, số lượng học viên đã ghi danh và danh sách tiêu đề bài học (chưa xem được nội dung bài)[cite: 16]. | Pending |
+| TC-04 | **HT-02**<br>*(Chi tiết khóa học)* | 1. Truy cập trực tiếp URL `/courses/{id}` của khóa học đang ở trạng thái nháp/ẩn bằng tài khoản khách. | ID khóa học `draft`/`hidden` | Từ chối hiển thị (404 hoặc 403), không lộ thông tin khóa học chưa công khai[cite: 16]. | Pending |
+| TC-05 | **HT-03**<br>*(Đăng ký)* | 1. Truy cập `/register`, nhập họ tên, email mới, mật khẩu hợp lệ và bấm **Đăng ký**.<br>2. Thử gửi request kèm tham số giả mạo `role=admin`. | Email: `sv_moi@example.com`<br>Pass: `12345678` | Tạo tài khoản với vai trò mặc định `student` (bỏ qua tham số `role=admin` giả mạo), mật khẩu được băm (hash) trong CSDL[cite: 16]. | Pending |
+| TC-06 | **HT-03**<br>*(Đăng ký)* | 1. Nhập email đã tồn tại, mật khẩu dưới 8 ký tự hoặc bỏ trống trường bắt buộc tại `/register`.<br>2. Bấm **Đăng ký**. | Email trùng / Pass: `123` | Chặn đăng ký và hiển thị thông báo lỗi validate rõ ràng bằng tiếng Việt[cite: 16]. | Pending |
+| TC-07 | **HT-03**<br>*(Đăng nhập)* | 1. Truy cập `/login`, nhập đúng email và mật khẩu của tài khoản `student`, `teacher`, `admin`.<br>2. Bấm **Đăng nhập**. | Tài khoản hợp lệ 3 vai trò | Đăng nhập thành công và điều hướng đúng trang làm việc tương ứng với từng vai trò[cite: 16]. | Pending |
+| TC-08 | **HT-03**<br>*(Đăng nhập)* | 1. Nhập sai mật khẩu hoặc đăng nhập bằng tài khoản đã bị quản trị viên khóa (`is_active = false`). | Email: `locked@test.com`<br>Pass: `12345678` | Từ chối đăng nhập và hiển thị thông báo lỗi tiếng Việt (sai thông tin hoặc tài khoản bị khóa)[cite: 16]. | Pending |
+| TC-09 | **HT-04**<br>*(Ghi danh)* | 1. Đăng nhập Học viên, vào chi tiết khóa `published` và bấm **Ghi danh**.<br>2. Quay lại khóa học đó và bấm **Ghi danh** lần thứ 2. | Tài khoản: `hv1@test.com`<br>Khóa học: `published` | Lần 1 ghi danh thành công (tối đa 1 lần/khóa); lần 2 bị chặn, báo đã ghi danh và không tạo bản ghi trùng[cite: 16]. | Pending |
+| TC-10 | **HT-04**<br>*(Khóa học của tôi & %)* | 1. Học viên đã ghi danh khóa có 4 bài học, hoàn thành 2/4 bài.<br>2. Mở trang **Khóa học của tôi** (`/my-courses`) và kiểm tra thêm khóa có 0 bài. | `completed = 2, total = 4`<br>và `completed = 0, total = 0` | Hiển thị đúng danh sách khóa đã ghi danh kèm thanh tiến độ `50%` (`2/4 bài`); khóa 0 bài hiển thị `0%` không lỗi chia cho 0[cite: 16]. | Pending |
+| TC-11 | **HT-05**<br>*(Học bài)* | 1. Mở trang học bài của khóa đã ghi danh.<br>2. Xem nội dung văn bản, video nhúng (YouTube), tệp PDF; bấm **Đánh dấu hoàn thành** và bấm **Bài trước / Bài sau**. | Tài khoản: `hv1@test.com`<br>Khóa học đã ghi danh | Hiển thị đầy đủ nội dung văn bản, video YouTube, PDF; lưu trạng thái hoàn thành (không trùng khi bấm lại) và chuyển bài trước/sau mượt mà[cite: 16]. | Pending |
+| TC-12 | **HT-05 (NFR2)**<br>*(Bảo vệ bài học/PDF)* | 1. Đăng nhập Học viên **chưa ghi danh** khóa học.<br>2. Truy cập trực tiếp URL trang học bài hoặc link tải tệp PDF đính kèm. | Tài khoản chưa ghi danh<br>URL học bài / URL tải PDF | Server chặn truy cập (`403 Forbidden` hoặc chuyển hướng yêu cầu ghi danh), chỉ học viên đã ghi danh mới xem/tải được[cite: 17]. | Pending |
+| TC-13 | **HT-06**<br>*(Làm bài trắc nghiệm)* | 1. Vào khóa đã ghi danh, làm bài trắc nghiệm 4 lựa chọn, chọn đáp án và bấm **Nộp bài** trước khi hết giờ. | Tài khoản: `hv1@test.com`<br>Đúng 8/10 câu | Hệ thống chấm điểm tự động (`8/10`), lưu lượt làm bài và hiển thị kết quả ngay lập tức[cite: 16]. | Pending |
+| TC-14 | **HT-06**<br>*(Giới hạn 3 lượt & Điểm cao)* | 1. Học viên làm bài 3 lượt với điểm lần lượt `5/10`, `9/10`, `7/10`.<br>2. Thử bấm làm tiếp lượt thứ 4. | Số lượt đã làm = `3` | Hệ thống lấy điểm cao nhất (`9/10`) làm kết quả chính thức; vô hiệu hóa và chặn không cho làm lượt thứ 4[cite: 16]. | Pending |
+| TC-15 | **HT-06 (NFR1)**<br>*(Ẩn đáp án & Giờ server)* | 1. Mở DevTools (`F12`) $\rightarrow$ tab **Network** khi tải câu hỏi bài thi.<br>2. Chỉnh đồng hồ máy tính lùi lại hoặc gửi request nộp bài sau khi hết `quiz_minutes`. | Phiên thi đang diễn ra;<br>Request nộp trễ hạn | Response gửi xuống trình duyệt không chứa đáp án đúng (`correct_option`); server tính giờ độc lập và từ chối bài nộp trễ[cite: 17]. | Pending |
+| TC-16 | **HT-07**<br>*(Hồ sơ cá nhân)* | 1. Đăng nhập Học viên, vào `/profile`.<br>2. Sửa họ tên và đổi mật khẩu (nhập đúng mật khẩu cũ, mật khẩu mới hợp lệ). | Tên mới: `Nguyễn Thành Nhân`<br>Pass mới: `87654321` | Cập nhật thông tin cá nhân và đổi mật khẩu thành công, hiển thị thông báo xác nhận[cite: 16]. | Pending |
+| TC-17 | **HT-07**<br>*(Lịch sử làm bài & điểm)* | 1. Truy cập mục lịch sử kết quả học tập của học viên.<br>2. Quan sát danh sách các lần làm bài trắc nghiệm. | Tài khoản đã làm $\ge 2$ lượt thi | Hiển thị đầy đủ danh sách các lần làm bài kèm tên khóa học, điểm số từng lần và thời gian nộp bài[cite: 16]. | Pending |
+| TC-18 | **HT-08** *(Cộng điểm)*<br>*(Hỏi đáp trong bài học)* | 1. Học viên đã ghi danh vào trang học bài, nhập câu hỏi bình luận dưới bài học và bấm **Gửi**.<br>2. Đăng nhập **Giảng viên** phụ trách khóa học và gửi câu trả lời cho bình luận đó. | Nội dung câu hỏi và câu trả lời hợp lệ | Bình luận của học viên và phản hồi của giảng viên hiển thị đúng dưới bài học tương ứng[cite: 16]. | Pending |
+| TC-19 | **HT-08** *(Cộng điểm)*<br>*(Validate hỏi đáp)* | 1. Học viên để trống nội dung bình luận rồi bấm **Gửi**.<br>2. Học viên **chưa ghi danh** gửi request bình luận vào bài học của khóa đó. | Nội dung rỗng; tài khoản chưa ghi danh | Chặn gửi bình luận rỗng (báo lỗi tiếng Việt) và từ chối bình luận từ học viên chưa ghi danh khóa học[cite: 16, 17]. | Pending |
+| TC-20 | **HT-09**<br>*(Quản lý khóa học)* | 1. Đăng nhập Giảng viên, vào `/teacher/courses`.<br>2. Tạo mới, sửa, xóa khóa học của mình (nhập tiêu đề, mô tả, ảnh bìa, chuyển trạng thái nháp/công khai). | Tiêu đề: `Lập trình PHP`<br>Trạng thái: `draft` $\rightarrow$ `published` | Thực hiện CRUD khóa học và chuyển đổi trạng thái nháp/công khai thành công[cite: 16]. | Pending |
+| TC-21 | **HT-09 (NFR3)**<br>*(Chặn sửa khóa khác)* | 1. **Giảng viên A** đổi ID trên URL `/teacher/courses/{id}/edit` sang khóa học của **Giảng viên B** để sửa hoặc xóa. | Tài khoản Giảng viên A;<br>ID khóa học Giảng viên B | Server kiểm tra quyền sở hữu (`teacher_id`) và chặn thao tác trái phép với lỗi `403 Forbidden`[cite: 17]. | Pending |
+| TC-22 | **HT-10 (NFR4)**<br>*(Quản lý bài học & PDF)* | 1. Thêm/sửa/xóa bài học, sắp xếp thứ tự bài học, dán link video YouTube và tải lên tệp PDF `≤ 5 MB`.<br>2. Thử tải lên tệp PDF `> 5 MB` hoặc tệp video `.mp4` trực tiếp lên server. | File `tailieu.pdf` (3 MB);<br>File `lon.pdf` (8 MB) / `video.mp4` | Lưu bài học, thứ tự, link video và PDF `≤ 5 MB` thành công; từ chối tệp vượt quá `5 MB` và không cho upload tệp video lên server[cite: 16, 17]. | Pending |
+| TC-23 | **HT-10 (NFR3)**<br>*(Chặn sửa bài học khác)* | 1. **Giảng viên A** gửi yêu cầu thêm/sửa/xóa bài học vào khóa học thuộc quyền sở hữu của **Giảng viên B**. | Tài khoản Giảng viên A;<br>ID khóa học Giảng viên B | Server từ chối thao tác trái phép với mã lỗi `403 Forbidden`[cite: 17]. | Pending |
+| TC-24 | **HT-11**<br>*(Quản lý câu hỏi thi)* | 1. Vào quản lý bài kiểm tra của khóa học, thêm/sửa/xóa câu hỏi 4 đáp án A/B/C/D, chọn 1 đáp án đúng.<br>2. Cài đặt thời gian làm bài (`quiz_minutes = 20`). | `correct_option = B`<br>`quiz_minutes = 20` | CRUD câu hỏi thành công và lưu đúng thời gian làm bài 20 phút cho khóa học[cite: 16]. | Pending |
+| TC-25 | **HT-11 (NFR3)**<br>*(Chặn sửa câu hỏi khác)* | 1. **Giảng viên A** đổi ID khóa học/câu hỏi sang khóa học của **Giảng viên B** để xem/sửa/xóa câu hỏi.<br>2. Bỏ trống nội dung câu hỏi khi lưu. | Giảng viên A thao tác khóa Giảng viên B; dữ liệu rỗng | Chặn truy cập chéo với lỗi `403 Forbidden`; báo lỗi validate tiếng Việt nếu thiếu nội dung/đáp án[cite: 16, 17]. | Pending |
+| TC-26 | **HT-12** *(Cộng điểm)*<br>*(Theo dõi học viên & CSV)* | 1. Đăng nhập Giảng viên, vào trang theo dõi học viên của khóa học mình quản lý.<br>2. Kiểm tra danh sách học viên, `% tiến độ`, điểm thi và bấm **Xuất CSV**. | Khóa học có $\ge 2$ học viên đã ghi danh và làm bài | Hiển thị đúng danh sách học viên, tiến độ hoàn thành, điểm số và tải về tệp `.csv` đầy đủ dữ liệu, không lỗi font[cite: 16]. | Pending |
+| TC-27 | **HT-12 (NFR3)**<br>*(Chặn xem/xuất CSV chéo)* | 1. **Giảng viên A** truy cập URL theo dõi học viên hoặc đường dẫn xuất CSV của khóa học thuộc **Giảng viên B**. | Tài khoản Giảng viên A;<br>ID khóa học Giảng viên B | Server kiểm tra chủ sở hữu khóa học và chặn truy cập với mã lỗi `403 Forbidden`[cite: 17]. | Pending |
+| TC-28 | **HT-14**<br>*(Tạo GV & Tìm kiếm user)* | 1. Đăng nhập Admin, vào `/admin/users`.<br>2. Tạo mới một tài khoản **Giảng viên** (`teacher`) và tìm kiếm người dùng theo tên/email. | Email: `gv_moi@test.com`<br>Vai trò: `teacher` | Tạo thành công tài khoản giảng viên và lọc tìm kiếm người dùng chính xác[cite: 17]. | Pending |
+| TC-29 | **HT-14**<br>*(Khóa/Mở khóa user)* | 1. Tại `/admin/users`, bấm **Khóa** một tài khoản đang hoạt động, sau đó thử đăng nhập bằng tài khoản đó.<br>2. Bấm **Mở khóa** lại. | User: `hv1@test.com` | Cập nhật trạng thái khóa/mở khóa thành công; tài khoản bị khóa không thể đăng nhập cho tới khi được mở khóa[cite: 17]. | Pending |
+| TC-30 | **HT-15**<br>*(CRUD Danh mục)* | 1. Đăng nhập Admin, vào `/admin/categories`.<br>2. Thêm mới, chỉnh sửa tên và xóa một danh mục khóa học. | Danh mục: `Cơ sở dữ liệu` | Thực hiện CRUD danh mục thành công và đồng bộ với danh sách chọn khi giảng viên tạo khóa học[cite: 17]. | Pending |
+| TC-31 | **HT-15**<br>*(Duyệt & Ẩn khóa học)* | 1. Tại `/admin/courses`, bấm **Duyệt** khóa học chờ duyệt và bấm **Ẩn** một khóa học công khai vi phạm.<br>2. Kiểm tra lại trang `/courses`. | Khóa học `pending` và khóa `published` vi phạm | Khóa được duyệt hiển thị công khai; khóa vi phạm bị ẩn biến mất khỏi danh sách công khai[cite: 17]. | Pending |
