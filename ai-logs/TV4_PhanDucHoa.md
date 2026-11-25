@@ -47,6 +47,14 @@ Kết quả AI đề xuất: Chỉ ra các thông tin cần rà soát như tên 
 
 Áp dụng: Hoàn thiện tài liệu mô tả 8 bảng trong file mo-ta-bang.md và chuẩn bị nội dung trình bày ERD.
 
+## Ngày 5 – Trình bày và chỉnh sửa ERD
+ Tìm hiểu và chuẩn hóa ERD theo 3NF
+- **Công cụ:** ChatGPT
+- **Nội dung hỏi:** Mô hình ERD chuẩn hóa 3NF là gì và áp dụng như thế nào vào đề tài Quản lý học tập?
+- **AI hỗ trợ:** Giải thích nguyên tắc chuẩn hóa 3NF và gợi ý cấu trúc các bảng chính như users, categories, courses, lessons, enrollments, lesson_progress, questions và quiz_attempts.
+- **Áp dụng:** Dựa trên gợi ý để xem xét lại quan hệ giữa các bảng và xây dựng ERD phù hợp với nghiệp vụ của hệ thống.
+- **Kết quả:** Có cơ sở để chỉnh sửa và trình bày ERD trong Mốc 1.
+
 ## Ngày 6 – HT-09: Quản lý khóa học giảng viên
 
  Hỗ trợ xây dựng chức năng quản lý khóa học (HT-09)
