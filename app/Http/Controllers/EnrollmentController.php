@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\User;
 use App\Services\EnrollmentService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -17,8 +18,15 @@ class EnrollmentController extends Controller
 
     public function store(Course $course): RedirectResponse
     {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($user->role !== 'student') {
+            abort(403, 'Chỉ tài khoản Học viên mới có thể ghi danh khóa học.');
+        }
+
         try {
-            $this->enrollmentService->enroll(Auth::user(), $course);
+            $this->enrollmentService->enroll($user, $course);
 
             return redirect()
                 ->route('student.my-courses')
@@ -30,7 +38,9 @@ class EnrollmentController extends Controller
 
     public function myCourses(): View
     {
-        $courses = $this->enrollmentService->getEnrolledCourses(Auth::user());
+        /** @var User $user */
+        $user = Auth::user();
+        $courses = $this->enrollmentService->getEnrolledCourses($user);
         $viewName = view()->exists('student.my-courses') ? 'student.my-courses' : 'courses.my-courses';
 
         return view($viewName, compact('courses'));

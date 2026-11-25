@@ -23,7 +23,7 @@ Mỗi thành viên đảm nhận một vai trò chuyên môn chung trong nhóm v
 | **TV1** | Nguyễn Hoàng Anh Vũ | 0306241254 | **LE** – Leader (Trưởng nhóm) | [0306241254@caothang.edu.vn](mailto:0306241254@caothang.edu.vn) | Quản lý tiến độ, điều phối Trello, lập biên bản họp/stand-up/retrospective, tổng hợp báo cáo & slide.<br>**Chức năng:** `HT-14`, `HT-15`, `HT-07` |
 | **TV2** | Phan Văn Hiếu | 0306241442 | **BE 1** – Backend 1 | [0306241442@caothang.edu.vn](mailto:0306241442@caothang.edu.vn) | Thiết kế khung API, xác thực, phân quyền theo vai trò, xử lý logic thi trắc nghiệm và chấm điểm server.<br>**Chức năng:** `HT-03`, `HT-06` |
 | **TV3** | Trần Thanh Hồ | 0306241279 | **FE** – Frontend | [0306241279@caothang.edu.vn](mailto:0306241279@caothang.edu.vn) | Thiết kế wireframe, xây dựng giao diện chuẩn responsive (360px & 1366px), trải nghiệm học tập.<br>**Chức năng:** `HT-01`, `HT-02`, `HT-05` |
-| **TV4** | Phan Văn Hòa | 0306241444 | **BE 2** – Backend 2 (CSDL) | [0306241444@caothang.edu.vn](mailto:0306241444@caothang.edu.vn) | Thiết kế ERD (7 thực thể), viết migration/script CSDL, tạo dữ liệu mẫu (tối thiểu 10 bản ghi/bảng chính).<br>**Chức năng:** `HT-09`, `HT-10` |
+| **TV4** | Phan Đức Hòa | 0306241444 | **BE 2** – Backend 2 (CSDL) | [0306241444@caothang.edu.vn](mailto:0306241444@caothang.edu.vn) | Thiết kế ERD (7 thực thể), viết migration/script CSDL, tạo dữ liệu mẫu (tối thiểu 10 bản ghi/bảng chính).<br>**Chức năng:** `HT-09`, `HT-10` |
 | **TV5** | Nguyễn Thành Nhân | 0306241315 | **GT** – Git & Tester | [0306241315@caothang.edu.vn](mailto:0306241315@caothang.edu.vn) | Quản lý quy tắc Git, bảo vệ nhánh, review PR, tổng hợp test case, kiểm thử bảo mật và kiểm thử chéo.<br>**Chức năng:** `HT-04`, `HT-11` |
 
 ---

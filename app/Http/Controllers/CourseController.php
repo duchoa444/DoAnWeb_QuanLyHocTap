@@ -56,11 +56,14 @@ class CourseController extends Controller
         ));
     }
 
-    // Chi tiết khóa học (HT-02)
+// Chi tiết khóa học (HT-02)
     public function show(Course $course): View
     {
+        $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+
+        // Chỉ Admin mới xem được trang chi tiết khi khóa học đang bị ẩn
         abort_unless(
-            in_array($course->status, ['published', 'public']),
+            in_array($course->status, ['published', 'public']) || $isAdmin,
             404
         );
 
@@ -95,6 +98,11 @@ class CourseController extends Controller
     // Ghi danh khóa học (HT-04)
     public function enroll(Course $course)
     {
+        // Chặn Giảng viên và Admin ghi danh
+        if (auth()->user()->role !== 'student') {
+            abort(403, 'Chỉ tài khoản Học viên mới có thể ghi danh khóa học.');
+        }
+
         $userId = auth()->id();
 
         $exists = DB::table('enrollments')
@@ -148,7 +156,8 @@ class CourseController extends Controller
     // Vào học bài giảng (HT-05)
     public function learn(Course $course, $lessonId = null)
     {
-        abort_unless(in_array($course->status, ['published', 'public']), 404);
+        $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+        abort_unless(in_array($course->status, ['published', 'public']) || $isAdmin, 404);
 
         $userId = auth()->id();
 
@@ -159,7 +168,7 @@ class CourseController extends Controller
                 ->where('user_id', $userId)
                 ->exists();
 
-        $isOwnerOrAdmin = ($course->teacher_id === $userId) || (auth()->user()->role === 'admin');
+        $isOwnerOrAdmin = ($course->teacher_id === $userId) || $isAdmin;
 
         if (!$isEnrolled && !$isOwnerOrAdmin) {
             return redirect()
@@ -218,6 +227,11 @@ class CourseController extends Controller
     // Đánh dấu hoàn thành bài học (HT-05)
     public function completeLesson(Course $course, $lessonId)
     {
+        // Chỉ Học viên mới lưu tiến độ hoàn thành bài học
+        if (auth()->user()->role !== 'student') {
+            abort(403, 'Chỉ tài khoản Học viên mới có thể đánh dấu hoàn thành bài học.');
+        }
+
         $userId = auth()->id();
 
         // Kiểm tra quyền ghi danh ở server (HT-NFR2)
@@ -227,12 +241,11 @@ class CourseController extends Controller
                 ->where('user_id', $userId)
                 ->exists();
 
-        $isOwnerOrAdmin = ($course->teacher_id === $userId) || (auth()->user()->role === 'admin');
-        if (!$isEnrolled && !$isOwnerOrAdmin) {
+        if (!$isEnrolled) {
             abort(403, 'Bạn chưa ghi danh khóa học này.');
         }
 
-        // Đảm bảo bài học thuộc đúng khóa học
+        // Đảm bảo bài học thuộc đúng khóa học (Dòng này định nghĩa biến $lesson)
         $lesson = $course->lessons()->where('id', (int) $lessonId)->firstOrFail();
 
         // Ghi vào bảng lesson_progress (chống trùng lặp)
@@ -269,4 +282,5 @@ class CourseController extends Controller
             ->route('courses.learn', [$course->id, $lesson->id])
             ->with('success', 'Đã đánh dấu hoàn thành bài học!');
     }
+    
 }

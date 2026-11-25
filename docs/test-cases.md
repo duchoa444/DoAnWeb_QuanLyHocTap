@@ -2,7 +2,7 @@
 
 ## 1. Quy ước chung
 - **Trạng thái:** `Pass` / `Fail` / `Pending`
-- **Môi trường kiểm thử:** Localhost — Laravel 12, SQLite (Chrome / Edge)
+- **Môi trường kiểm thử:** Localhost — Laravel 12, MySQL (Chrome / Edge)
 - **Độ phủ kiểm thử:** Đủ 12 chức năng bắt buộc (`HT-01`–`HT-07`, `HT-09`–`HT-11`, `HT-14`–`HT-15`), 2 chức năng cộng điểm (`HT-08`, `HT-12`)[cite: 15, 16, 17] và 4 yêu cầu phi chức năng đặc thù (`HT-NFR1`–`HT-NFR4`)[cite: 17]. *(Không thực hiện `HT-13`, `HT-16`)*.
 
 ---

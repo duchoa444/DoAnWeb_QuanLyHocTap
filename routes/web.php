@@ -126,7 +126,7 @@ Route::middleware(['auth', 'role:admin'])
             ->name('courses.approve');
         Route::patch('/courses/{course}/hide', [AdminCourseController::class, 'hide'])
             ->name('courses.hide');
-
+        
         // Quản lý danh mục
         Route::resource('categories', AdminCategoryController::class)
             ->only(['index', 'store', 'update', 'destroy']);

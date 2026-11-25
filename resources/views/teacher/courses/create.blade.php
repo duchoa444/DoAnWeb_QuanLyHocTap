@@ -42,7 +42,7 @@
                     <select name="status" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                         <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Bản nháp</option>
                         <option value="pending" {{ old('status') === 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
-                        <option value="published" {{ old('status', 'published') === 'published' ? 'selected' : '' }}>Xuất bản</option>
+                        
                     </select>
                 </div>
             </div>
