@@ -29,11 +29,7 @@
     </div>
 
     {{-- Thông báo --}}
-    @if(session('success'))
-        <div style="padding: 12px 16px; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 16px; font-size: 14px;">
-            {{ session('success') }}
-        </div>
-    @endif
+  
 
     @if($errors->any())
         <div style="padding: 12px 16px; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; border-radius: 8px; margin-bottom: 16px; font-size: 14px;">

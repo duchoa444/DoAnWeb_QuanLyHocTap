@@ -23,11 +23,7 @@
         </span>
     </div>
 
-    @if(session('success'))
-        <div style="background: #d4edda; color: #155724; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px;">
-            {{ session('success') }}
-        </div>
-    @endif
+
 
     {{-- Layout 2 cột: Danh sách bài bên trái (30%) - Nội dung bài bên phải (70%) --}}
     <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
@@ -57,7 +53,7 @@
         </div>
 
         {{-- CỘT PHẢI: Nội dung bài học hiện tại --}}
-        <div style="flex: 2.3; min-width: 0; width: 100%; box-sizing: border-box; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 24px;">
+     <div style="flex: 2.3; min-width: 300px; max-width: 100%; width: 100%; box-sizing: border-box; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 24px;">
             <h2 style="margin: 0 0 16px 0; font-size: 22px;">{{ $currentLesson->title }}</h2>
 
             {{-- 1. Video nhúng (nếu có) --}}
