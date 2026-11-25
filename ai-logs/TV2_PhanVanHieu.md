@@ -119,6 +119,11 @@
   - *Prompt:* Nhờ AI hỗ trợ hoàn thiện bộ Unit Test PHPUnit (`tests/Unit/QuizServiceTest.php`) kiểm tra kịch bản chặn học viên khi làm đủ 3 lượt (`test_het_3_luot_lam_bai_bi_chan`), truy xuất điểm cao nhất (`test_lay_diem_cao_nhat_qua_cac_lan_lam`) và kiểm tra ràng buộc quá thời gian nộp bài trong `QuizService.php`.
   - *Kiểm chứng & Chỉnh sửa:* Tự đối chiếu tên phương thức (`start`, `submit`, `getResult`) và cấu trúc dữ liệu của `QuizService.php`, chạy lệnh `php artisan test --filter=QuizServiceTest` xác nhận toàn bộ 5/5 test case (13 assertions) đạt trạng thái PASS.
 
+  ## Ngày 11 – Thứ 2, tuần 3 (Đóng băng chức năng & Kiểm thử chéo)
+- **Mục tiêu:** Chốt đóng băng 100% chức năng bắt buộc (`HT-03`, `HT-06`), thực hiện kiểm thử chéo hệ thống của nhóm bạn (đăng nhập, phân quyền, bảo mật bài trắc nghiệm), tiếp nhận/sửa lỗi và nhận phân công viết báo cáo (Chương 5 – Kiến trúc & Chương 6).
+- **Sử dụng AI:**
+  - *Prompt:* Nhờ AI gợi ý danh sách kịch bản kiểm thử chéo bảo mật cho luồng xác thực và làm bài trắc nghiệm (vượt quyền URL `/teacher/`, `/admin/`, kiểm tra lộ đáp án qua Network F12, nộp bài quá thời gian quy định và vượt quá số lượt thi) cũng như chuẩn quy trình tạo nhánh `fix/...` và commit kèm từ khóa `Closes #<số-issue>`.
+  - *Kiểm chứng & Chỉnh sửa:* Tự thực hiện kiểm thử thủ công từng kịch bản trên sản phẩm của nhóm bạn, ghi nhận Issue kèm các bước tái hiện chi tiết; đối với các phản hồi lỗi của nhóm mình, tiến hành tái hiện, sửa code trên nhánh `fix/...`, chạy lại `php artisan test --filter=QuizServiceTest` (đảm bảo 5/5 test case PASS) và cập nhật tài liệu.
   ## Ngày 12 – Thứ 3, tuần 3 (Hoàn tất sửa lỗi & Viết bản nháp Chương 5, Chương 6)
 - **Mục tiêu:** Đảm bảo 0 lỗi tồn đọng ở phần `HT-03`, `HT-06`, viết bản nháp Chương 5 (Kiến trúc hệ thống, phân quyền 3 vai trò) và Chương 6 (Mẫu thiết kế, mã giả và độ phức tạp thuật toán chấm trắc nghiệm) trên nhánh `docs/bao-cao-c5-c6`.
 - **Sử dụng AI:**
