@@ -124,3 +124,20 @@
 - **Sử dụng AI:**
   - *Prompt:* Nhờ AI gợi ý danh sách kịch bản kiểm thử chéo bảo mật cho luồng xác thực và làm bài trắc nghiệm (vượt quyền URL `/teacher/`, `/admin/`, kiểm tra lộ đáp án qua Network F12, nộp bài quá thời gian quy định và vượt quá số lượt thi) cũng như chuẩn quy trình tạo nhánh `fix/...` và commit kèm từ khóa `Closes #<số-issue>`.
   - *Kiểm chứng & Chỉnh sửa:* Tự thực hiện kiểm thử thủ công từng kịch bản trên sản phẩm của nhóm bạn, ghi nhận Issue kèm các bước tái hiện chi tiết; đối với các phản hồi lỗi của nhóm mình, tiến hành tái hiện, sửa code trên nhánh `fix/...`, chạy lại `php artisan test --filter=QuizServiceTest` (đảm bảo 5/5 test case PASS) và cập nhật tài liệu.
+  ## Ngày 12 – Thứ 3, tuần 3 (Hoàn tất sửa lỗi & Viết bản nháp Chương 5, Chương 6)
+- **Mục tiêu:** Đảm bảo 0 lỗi tồn đọng ở phần `HT-03`, `HT-06`, viết bản nháp Chương 5 (Kiến trúc hệ thống, phân quyền 3 vai trò) và Chương 6 (Mẫu thiết kế, mã giả và độ phức tạp thuật toán chấm trắc nghiệm) trên nhánh `docs/bao-cao-c5-c6`.
+- **Sử dụng AI:**
+  - *Prompt:* Nhờ AI hỗ trợ hệ thống hóa cấu trúc Chương 5 (mô hình MVC + Service Layer, cơ chế RBAC 3 vai trò) và chuẩn hóa mã giả (Pseudocode) cùng đánh giá độ phức tạp thời gian/không gian $O(N)$ cho thuật toán khởi tạo và chấm điểm trắc nghiệm trong `QuizService.php`.
+  - *Kiểm chứng & Chỉnh sửa:* Đối chiếu trực tiếp từng dòng mã giả với mã nguồn thực tế trong `app/Services/QuizService.php` và `app/Services/AuthService.php` để đảm bảo các điều kiện biên (30 giây ân hạn nộp bài, chặn quá 3 lượt thi, băm mật khẩu) khớp 100% với hệ thống đang chạy.
+
+---
+
+## Phản tư quá trình sử dụng AI (AI Reflection – TV2)
+
+### 1. Hai trường hợp AI hỗ trợ hiệu quả (Tốt)
+1. **Sinh khung Unit Test PHPUnit (`QuizServiceTest.php`):** Khi cung cấp đặc tả nghiệp vụ của `HT-06` (chấm điểm thang 10, chặn quá 3 lượt thi, lấy điểm cao nhất `bestScore`), AI nhanh chóng tạo ra cấu trúc các hàm test chuẩn cú pháp PHPUnit và `RefreshDatabase`, giúp tiết kiệm khoảng 60% thời gian viết mã kiểm thử lặp lại.
+2. **Hệ thống hóa mã giả (Pseudocode) và phân tích độ phức tạp cho Chương 6:** AI chuyển đổi tốt logic xử lý từ mã nguồn PHP (`QuizService::start` và `QuizService::submit`) sang dạng mã giả chuẩn thuật toán và phân tích rõ độ phức tạp $O(N)$, giúp phần trình bày báo cáo mạch lạc, khoa học.
+
+### 2. Hai trường hợp AI đưa ra kết quả chưa chính xác cần tự sửa (Sai)
+1. **Giả định sai tên phương thức và cột dữ liệu khi sinh Unit Test lần đầu:** AI tự đặt tên hàm là `startAttempt()` và `getHighestScore()` cùng cột `quiz_id`, trong khi dự án thực tế thiết kế `QuizService` dùng `start()`, `getResult()` và gắn trực tiếp `course_id`. *Cách khắc phục:* Tự rà soát toàn bộ schema database và chữ ký hàm trong `QuizService.php`, sửa lại test case cho khớp thực tế để đạt 5/5 PASS.
+2. **Thiếu kiểm tra thời gian quá hạn ở hàm `submit()` dẫn đến test case bị lỗi (FAIL):** Ở phiên bản đầu, logic kiểm tra quá giờ chỉ nằm ở hàm `start()` (khi mở lại bài cũ) mà chưa chặn trực tiếp tại thời điểm gọi `submit()`, khiến kịch bản người dùng cố tình nộp trễ qua API không ném ra `Exception`. *Cách khắc phục:* Tự bổ sung khối kiểm tra `started_at + quiz_minutes + 30s` ngay đầu hàm `QuizService::submit()` để vá lỗ hổng và giúp toàn bộ bộ test chạy xanh.
