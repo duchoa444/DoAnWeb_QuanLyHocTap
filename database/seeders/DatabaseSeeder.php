@@ -10,6 +10,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        /*
+         * DU LIEU DEMO TV4
+         * - 5 danh muc
+         * - 1 admin, 3 giang vien, 15 hoc vien
+         * - 2 khoa hoc demo
+         * - Moi khoa hoc co 5 bai hoc va 10 cau hoi
+         * - Co du lieu ghi danh, tien do va luot thi mau
+         */
+
         // 1. Tao 5 danh muc
         $categoryNames = [
             'Lap trinh',
@@ -40,11 +49,20 @@ class DatabaseSeeder extends Seeder
             $categoryIds[$name] = $id;
         }
 
-        // 2. Tao 3 giao vien va 1 admin
+        // 2. Tao tai khoan giang vien
         $teachers = [
-            ['name' => 'Nguyen Van An', 'email' => 'teacher01@example.com'],
-            ['name' => 'Tran Thi Binh', 'email' => 'teacher02@example.com'],
-            ['name' => 'Le Van Cuong', 'email' => 'teacher03@example.com'],
+            [
+                'name' => 'Nguyen Van An',
+                'email' => 'teacher01@example.com'
+            ],
+            [
+                'name' => 'Tran Thi Binh',
+                'email' => 'teacher02@example.com'
+            ],
+            [
+                'name' => 'Le Van Cuong',
+                'email' => 'teacher03@example.com'
+            ],
         ];
 
         foreach ($teachers as $teacher) {
@@ -58,6 +76,7 @@ class DatabaseSeeder extends Seeder
             );
         }
 
+        // Tao tai khoan admin
         User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
@@ -67,7 +86,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 3. Tao 15 hoc vien
+        // 3. Tao 15 tai khoan hoc vien
         $students = [];
 
         for ($i = 1; $i <= 15; $i++) {
@@ -85,62 +104,27 @@ class DatabaseSeeder extends Seeder
             $students[] = $student;
         }
 
-        // 4. Tao 8 khoa hoc
+        // 4. Tao dung 2 khoa hoc demo
         $courseData = [
             [
                 'title' => 'Lap trinh PHP co ban',
                 'category' => 'Lap trinh',
                 'teacher' => 'teacher01@example.com',
-                'description' => 'Lam quen voi ngon ngu PHP.',
+                'description' => 'Khoa hoc gioi thieu cu phap PHP, bien, dieu kien, vong lap va ham.',
             ],
             [
-                'title' => 'Lap trinh Laravel',
-                'category' => 'Lap trinh',
-                'teacher' => 'teacher02@example.com',
-                'description' => 'Xay dung ung dung web bang Laravel.',
-            ],
-            [
-                'title' => 'Lap trinh JavaScript',
-                'category' => 'Lap trinh',
-                'teacher' => 'teacher03@example.com',
-                'description' => 'Kien thuc JavaScript co ban.',
-            ],
-            [
-                'title' => 'SQL Server co ban',
-                'category' => 'Co so du lieu',
-                'teacher' => 'teacher01@example.com',
-                'description' => 'Hoc truy van va quan ly du lieu.',
-            ],
-            [
-                'title' => 'Thiet ke giao dien HTML CSS',
-                'category' => 'Thiet ke web',
-                'teacher' => 'teacher02@example.com',
-                'description' => 'Xay dung giao dien website.',
-            ],
-            [
-                'title' => 'Mang may tinh can ban',
-                'category' => 'Mang may tinh',
-                'teacher' => 'teacher03@example.com',
-                'description' => 'Tim hieu kien thuc mang may tinh.',
-            ],
-            [
-                'title' => 'Phan tich thiet ke phan mem',
-                'category' => 'Phat trien phan mem',
-                'teacher' => 'teacher01@example.com',
-                'description' => 'Phan tich yeu cau va thiet ke he thong.',
-            ],
-            [
-                'title' => 'Kiem thu phan mem',
+                'title' => 'Lap trinh Laravel co ban',
                 'category' => 'Phat trien phan mem',
                 'teacher' => 'teacher02@example.com',
-                'description' => 'Kien thuc kiem thu phan mem.',
+                'description' => 'Khoa hoc huong dan xay dung ung dung web voi Laravel, MVC, migration va Eloquent.',
             ],
         ];
 
         $courses = [];
 
         foreach ($courseData as $data) {
-            $teacherId = User::where('email', $data['teacher'])->value('id');
+            $teacherId = User::where('email', $data['teacher'])
+                ->value('id');
 
             $course = DB::table('courses')
                 ->where('title', $data['title'])
@@ -152,13 +136,15 @@ class DatabaseSeeder extends Seeder
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'quiz_minutes' => 30,
-                'status' => 'published',
+                'status' => 'public',
                 'updated_at' => now(),
             ];
 
             if (!$course) {
                 $values['created_at'] = now();
-                $courseId = DB::table('courses')->insertGetId($values);
+
+                $courseId = DB::table('courses')
+                    ->insertGetId($values);
             } else {
                 DB::table('courses')
                     ->where('id', $course->id)
@@ -171,9 +157,61 @@ class DatabaseSeeder extends Seeder
         }
 
         // 5. Tao 5 bai hoc cho moi khoa hoc
-        foreach ($courses as $courseId) {
-            for ($position = 1; $position <= 5; $position++) {
-                $title = 'Bai hoc ' . $position;
+        $lessonsByCourse = [
+            'Lap trinh PHP co ban' => [
+                [
+                    'title' => 'Gioi thieu PHP va moi truong chay',
+                    'content' => 'PHP la ngon ngu lap trinh phia may chu, thuong dung de xay dung website dong. Bai hoc gioi thieu PHP, web server va cach chay mot tep PHP.',
+                ],
+                [
+                    'title' => 'Bien, hang va cac kieu du lieu',
+                    'content' => 'Bai hoc trinh bay cach khai bao bien bang dau $, hang, chuoi, so, boolean, mang va mot so phep ep kieu co ban trong PHP.',
+                ],
+                [
+                    'title' => 'Toan tu va cau truc dieu kien',
+                    'content' => 'Bai hoc huong dan su dung toan tu so hoc, so sanh, logic va cac cau truc if, elseif, else, switch de xu ly dieu kien.',
+                ],
+                [
+                    'title' => 'Vong lap va mang trong PHP',
+                    'content' => 'Bai hoc gioi thieu for, while, foreach va cach tao, truy cap, duyet mang de xu ly danh sach du lieu.',
+                ],
+                [
+                    'title' => 'Ham va xu ly form co ban',
+                    'content' => 'Bai hoc huong dan khai bao ham, tham so, gia tri tra ve va tiep nhan du lieu form thong qua GET va POST.',
+                ],
+            ],
+
+            'Lap trinh Laravel co ban' => [
+                [
+                    'title' => 'Tong quan Laravel va cau truc MVC',
+                    'content' => 'Bai hoc gioi thieu Laravel, cach tao du an va vai tro cua Model, View, Controller trong kien truc MVC.',
+                ],
+                [
+                    'title' => 'Routing va Controller',
+                    'content' => 'Bai hoc huong dan khai bao route, su dung tham so tren URL va tao Controller de tiep nhan, xu ly yeu cau.',
+                ],
+                [
+                    'title' => 'Blade Template va truyen du lieu',
+                    'content' => 'Bai hoc gioi thieu Blade, layout, include, hien thi bien va truyen du lieu tu Controller sang View.',
+                ],
+                [
+                    'title' => 'Migration va Eloquent ORM',
+                    'content' => 'Bai hoc huong dan tao migration, khai bao cot, chay migration va su dung Eloquent Model de thao tac voi co so du lieu.',
+                ],
+                [
+                    'title' => 'CRUD va Validation',
+                    'content' => 'Bai hoc trinh bay quy trinh them, xem, sua, xoa du lieu va kiem tra du lieu dau vao bang Validation.',
+                ],
+            ],
+        ];
+
+        foreach ($courseData as $data) {
+            $courseId = DB::table('courses')
+                ->where('title', $data['title'])
+                ->value('id');
+
+            foreach ($lessonsByCourse[$data['title']] as $index => $lessonData) {
+                $position = $index + 1;
 
                 $lesson = DB::table('lessons')
                     ->where('course_id', $courseId)
@@ -181,8 +219,8 @@ class DatabaseSeeder extends Seeder
                     ->first();
 
                 $values = [
-                    'title' => $title,
-                    'content' => 'Noi dung mau cua bai hoc ' . $position,
+                    'title' => $lessonData['title'],
+                    'content' => $lessonData['content'],
                     'video_url' => null,
                     'updated_at' => now(),
                 ];
@@ -201,92 +239,181 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // 6. Tao 10 cau hoi mau cho moi khoa hoc
-        $questionTemplates = [
-            [
-                'q' => 'Muc tieu chinh cua khoa hoc nay la gi?',
-                'a' => 'Nam vung kien thuc va ky nang',
-                'b' => 'Chi hoc thuoc ly thuyet',
-                'c' => 'Khong can thuc hanh',
-                'd' => 'Bo qua kien thuc co ban',
-                'correct' => 'A',
+        // 6. Tao 10 cau hoi rieng cho moi khoa hoc
+        $questionsByCourse = [
+            'Lap trinh PHP co ban' => [
+                [
+                    'q' => 'PHP thuong duoc su dung de lam gi?',
+                    'a' => 'Lap trinh phia may chu',
+                    'b' => 'Thiet ke mach dien',
+                    'c' => 'Bien tap video',
+                    'd' => 'Ve do hoa 3D',
+                    'correct' => 'A'
+                ],
+                [
+                    'q' => 'Ky tu nao dung de khai bao bien trong PHP?',
+                    'a' => '#',
+                    'b' => '$',
+                    'c' => '@',
+                    'd' => '&',
+                    'correct' => 'B'
+                ],
+                [
+                    'q' => 'Lenh nao dung de hien thi noi dung trong PHP?',
+                    'a' => 'printText()',
+                    'b' => 'show()',
+                    'c' => 'echo',
+                    'd' => 'displayHTML()',
+                    'correct' => 'C'
+                ],
+                [
+                    'q' => 'Kieu du lieu nao dung de luu gia tri dung hoac sai?',
+                    'a' => 'Boolean',
+                    'b' => 'String',
+                    'c' => 'Array',
+                    'd' => 'Float',
+                    'correct' => 'A'
+                ],
+                [
+                    'q' => 'Cau lenh nao dung de re nhanh theo dieu kien?',
+                    'a' => 'foreach',
+                    'b' => 'function',
+                    'c' => 'echo',
+                    'd' => 'if',
+                    'correct' => 'D'
+                ],
+                [
+                    'q' => 'Vong lap nao thuong dung de duyet tung phan tu cua mang?',
+                    'a' => 'switch',
+                    'b' => 'foreach',
+                    'c' => 'return',
+                    'd' => 'echo',
+                    'correct' => 'B'
+                ],
+                [
+                    'q' => 'Tu khoa nao dung de khai bao ham trong PHP?',
+                    'a' => 'method',
+                    'b' => 'defineFunction',
+                    'c' => 'function',
+                    'd' => 'func',
+                    'correct' => 'C'
+                ],
+                [
+                    'q' => 'Mang trong PHP duoc dung de lam gi?',
+                    'a' => 'Luu tap hop nhieu gia tri',
+                    'b' => 'Chi luu mot so nguyen',
+                    'c' => 'Ket noi Internet',
+                    'd' => 'Tao giao dien CSS',
+                    'correct' => 'A'
+                ],
+                [
+                    'q' => 'Phuong thuc HTTP nao thuong dung de gui du lieu form?',
+                    'a' => 'STYLE',
+                    'b' => 'LINK',
+                    'c' => 'IMAGE',
+                    'd' => 'POST',
+                    'correct' => 'D'
+                ],
+                [
+                    'q' => 'Ham co the tra ket qua ve bang tu khoa nao?',
+                    'a' => 'echo',
+                    'b' => 'return',
+                    'c' => 'break',
+                    'd' => 'continue',
+                    'correct' => 'B'
+                ],
             ],
-            [
-                'q' => 'Khi gap mot noi dung chua hieu, nen lam gi?',
-                'a' => 'Bo qua noi dung',
-                'b' => 'Tim hieu va hoi nguoi huong dan',
-                'c' => 'Dung hoc ngay',
-                'd' => 'Doan dap an',
-                'correct' => 'B',
-            ],
-            [
-                'q' => 'Cach nao giup ghi nho kien thuc tot hon?',
-                'a' => 'Chi doc mot lan',
-                'b' => 'Khong can on tap',
-                'c' => 'On tap va thuc hanh thuong xuyen',
-                'd' => 'Hoc khong theo ke hoach',
-                'correct' => 'C',
-            ],
-            [
-                'q' => 'Truoc khi thuc hien bai tap, nen lam gi?',
-                'a' => 'Doc va phan tich yeu cau',
-                'b' => 'Lam ngay khong can doc',
-                'c' => 'Bo qua huong dan',
-                'd' => 'Sao chep bai cua nguoi khac',
-                'correct' => 'A',
-            ],
-            [
-                'q' => 'Khi phat hien loi trong bai lam, nen lam gi?',
-                'a' => 'Xoa bo toan bo du an',
-                'b' => 'Bo qua loi',
-                'c' => 'Dung thuc hanh',
-                'd' => 'Kiem tra va tim nguyen nhan',
-                'correct' => 'D',
-            ],
-            [
-                'q' => 'Tai sao can thuc hanh sau khi hoc ly thuyet?',
-                'a' => 'De tang thoi gian hoc',
-                'b' => 'De ap dung kien thuc vao thuc te',
-                'c' => 'De khong can on bai',
-                'd' => 'De tranh lam bai tap',
-                'correct' => 'B',
-            ],
-            [
-                'q' => 'Viec lap ke hoach hoc tap co tac dung gi?',
-                'a' => 'Lam viec hoc kho khan hon',
-                'b' => 'Khong co tac dung',
-                'c' => 'Giup theo doi tien do hoc tap',
-                'd' => 'Thay the viec thuc hanh',
-                'correct' => 'C',
-            ],
-            [
-                'q' => 'Khi lam viec nhom, dieu gi la quan trong?',
-                'a' => 'Trao doi va phoi hop',
-                'b' => 'Lam viec rieng le',
-                'c' => 'Khong chia se thong tin',
-                'd' => 'Khong phan cong cong viec',
-                'correct' => 'A',
-            ],
-            [
-                'q' => 'Sau khi hoan thanh bai hoc, nen lam gi?',
-                'a' => 'Xoa het noi dung',
-                'b' => 'Khong can kiem tra',
-                'c' => 'Dung hoc tap',
-                'd' => 'On tap va tu danh gia',
-                'correct' => 'D',
-            ],
-            [
-                'q' => 'Yeu to nao giup cai thien ket qua hoc tap?',
-                'a' => 'Hoc khong deu dan',
-                'b' => 'Kien tri va thuc hanh',
-                'c' => 'Khong dat muc tieu',
-                'd' => 'Bo qua bai tap',
-                'correct' => 'B',
+
+            'Lap trinh Laravel co ban' => [
+                [
+                    'q' => 'Laravel la framework cua ngon ngu nao?',
+                    'a' => 'Java',
+                    'b' => 'Python',
+                    'c' => 'PHP',
+                    'd' => 'C#',
+                    'correct' => 'C'
+                ],
+                [
+                    'q' => 'MVC la viet tat cua cum tu nao?',
+                    'a' => 'Model View Controller',
+                    'b' => 'Main Variable Code',
+                    'c' => 'Multiple View Class',
+                    'd' => 'Method View Command',
+                    'correct' => 'A'
+                ],
+                [
+                    'q' => 'Tep route web mac dinh cua Laravel nam o dau?',
+                    'a' => 'app/Models',
+                    'b' => 'routes/web.php',
+                    'c' => 'public/index.html',
+                    'd' => 'database/seeders',
+                    'correct' => 'B'
+                ],
+                [
+                    'q' => 'Lenh nao tao Controller bang Artisan?',
+                    'a' => 'php artisan make:model',
+                    'b' => 'php artisan serve',
+                    'c' => 'php artisan migrate',
+                    'd' => 'php artisan make:controller',
+                    'correct' => 'D'
+                ],
+                [
+                    'q' => 'Blade la thanh phan nao cua Laravel?',
+                    'a' => 'He quan tri co so du lieu',
+                    'b' => 'Cong cu quan ly Git',
+                    'c' => 'Template engine',
+                    'd' => 'May chu web',
+                    'correct' => 'C'
+                ],
+                [
+                    'q' => 'Migration trong Laravel dung de lam gi?',
+                    'a' => 'Quan ly thay doi cau truc co so du lieu',
+                    'b' => 'Tao hinh anh',
+                    'c' => 'Quan ly email',
+                    'd' => 'Nen tep du an',
+                    'correct' => 'A'
+                ],
+                [
+                    'q' => 'Eloquent ORM ho tro thao tac voi thanh phan nao?',
+                    'a' => 'Tep CSS',
+                    'b' => 'Co so du lieu thong qua Model',
+                    'c' => 'Trinh duyet',
+                    'd' => 'May in',
+                    'correct' => 'B'
+                ],
+                [
+                    'q' => 'Lenh nao khoi dong may chu phat trien Laravel?',
+                    'a' => 'php artisan migrate',
+                    'b' => 'php artisan route:list',
+                    'c' => 'php artisan serve',
+                    'd' => 'php artisan make:model',
+                    'correct' => 'C'
+                ],
+                [
+                    'q' => 'Validation duoc dung de lam gi?',
+                    'a' => 'Tao tai khoan GitHub',
+                    'b' => 'Doi ten bang',
+                    'c' => 'Nen co so du lieu',
+                    'd' => 'Kiem tra du lieu dau vao',
+                    'correct' => 'D'
+                ],
+                [
+                    'q' => 'Thu muc nao chua cac Model trong Laravel?',
+                    'a' => 'app/Models',
+                    'b' => 'resources/css',
+                    'c' => 'routes',
+                    'd' => 'storage/logs',
+                    'correct' => 'A'
+                ],
             ],
         ];
 
-        foreach ($courses as $courseId) {
-            foreach ($questionTemplates as $index => $question) {
+        foreach ($courseData as $data) {
+            $courseId = DB::table('courses')
+                ->where('title', $data['title'])
+                ->value('id');
+
+            foreach ($questionsByCourse[$data['title']] as $index => $question) {
                 $questionText = 'Cau ' . ($index + 1) . ': ' . $question['q'];
 
                 $exists = DB::table('questions')
@@ -311,59 +438,61 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // 7. Tao dang ky khoa hoc mau
-        foreach ($students as $index => $student) {
-            $courseIndexes = [
-                $index % 8,
-                ($index + 3) % 8,
-            ];
+        // 7. Tao ghi danh mau: moi hoc vien ghi danh ca 2 khoa hoc
+        foreach ($students as $student) {
+            foreach ($courses as $courseId) {
+                $exists = DB::table('enrollments')
+                    ->where('user_id', $student->id)
+                    ->where('course_id', $courseId)
+                    ->exists();
 
-            foreach (array_unique($courseIndexes) as $courseIndex) {
-                $courseId = $courses[$courseIndex];
-
-                DB::table('enrollments')->updateOrInsert(
-                    [
+                if (!$exists) {
+                    DB::table('enrollments')->insert([
                         'user_id' => $student->id,
                         'course_id' => $courseId,
-                    ],
-                    [
                         'enrolled_at' => now(),
                         'status' => 'active',
-                        'updated_at' => now(),
                         'created_at' => now(),
-                    ]
-                );
+                        'updated_at' => now(),
+                    ]);
+                }
             }
         }
 
-        // 8. Tao tien do hoc tap mau cho 5 hoc vien
+        // 8. Tao tien do mau cho 5 hoc vien o bai hoc dau tien cua khoa PHP
+        $phpCourseId = DB::table('courses')
+            ->where('title', 'Lap trinh PHP co ban')
+            ->value('id');
+
+        $firstLessonId = DB::table('lessons')
+            ->where('course_id', $phpCourseId)
+            ->where('position', 1)
+            ->value('id');
+
         for ($i = 0; $i < 5; $i++) {
             $student = $students[$i];
-            $courseId = $courses[$i % 8];
 
-            $lessonId = DB::table('lessons')
-                ->where('course_id', $courseId)
-                ->where('position', 1)
-                ->value('id');
+            $exists = DB::table('lesson_progress')
+                ->where('user_id', $student->id)
+                ->where('lesson_id', $firstLessonId)
+                ->exists();
 
-            DB::table('lesson_progress')->updateOrInsert(
-                [
+            if (!$exists) {
+                DB::table('lesson_progress')->insert([
                     'user_id' => $student->id,
-                    'lesson_id' => $lessonId,
-                ],
-                [
+                    'lesson_id' => $firstLessonId,
                     'status' => 'completed',
                     'completed_at' => now(),
-                    'updated_at' => now(),
                     'created_at' => now(),
-                ]
-            );
+                    'updated_at' => now(),
+                ]);
+            }
         }
 
-        // 9. Tao mot vai luot lam bai kiem tra mau
+        // 9. Tao 3 luot lam bai mau
         for ($i = 0; $i < 3; $i++) {
             $student = $students[$i];
-            $courseId = $courses[$i];
+            $courseId = $courses[$i % 2];
 
             $exists = DB::table('quiz_attempts')
                 ->where('user_id', $student->id)
