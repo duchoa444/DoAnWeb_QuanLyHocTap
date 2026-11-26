@@ -35,7 +35,7 @@
         @foreach($questions as $index => $q)
             <div class="card shadow-sm mb-3">
                 <div class="card-body">
-                    <p class="fw-bold mb-3">Câu {{ $index + 1 }}: {{ $q->question_text ?? $q->content ?? $q->question ?? '' }}</p>
+                    <p class="fw-bold mb-3">Câu {{ $index + 1 }}: {{ preg_replace('/^(câu|cau)\s*\d+\s*[:.-]\s*/iu', '', $q->question_text ?? $q->content ?? $q->question ?? '') }}</p>
                     @foreach(['A' => $q->option_a, 'B' => $q->option_b, 'C' => $q->option_c, 'D' => $q->option_d] as $key => $text)
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio"

@@ -47,7 +47,7 @@
         <div class="card shadow-sm mb-3">
             <div class="card-body">
                 <p class="fw-bold mb-2">
-                    Câu {{ $index + 1 }}: {{ $q->question_text }}
+                    Câu {{ $index + 1 }}: {{ preg_replace('/^(câu|cau)\s*\d+\s*[:.-]\s*/iu', '', $q->question_text) }}
                     <span class="badge bg-success ms-2">Đáp án đúng: {{ $correct }}</span>
                     @if($chosen !== '')
                         <span class="badge {{ $chosen === $correct ? 'bg-primary' : 'bg-danger' }} ms-1">
