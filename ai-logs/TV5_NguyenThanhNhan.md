@@ -128,3 +128,13 @@
 - **Kiểm tra & Chỉnh sửa của thành viên:**
   - Đã đối chiếu các trường dữ liệu khởi tạo (`category_id`, `teacher_id`, `quiz_minutes`, `status`) trong `EnrollmentServiceTest` cho khớp với migration thực tế và chạy `php artisan test` xác nhận toàn bộ test case đều đạt (Pass).
   - Đã bổ sung lệnh `php artisan test` vào `README.md`, merge nhánh `test/HT-04` vào `develop` và gắn tag `v0.5` trên GitHub[cite: 8, 9].
+
+  ## Phản tư sử dụng AI - TV5 (Nguyễn Thành Nhân)
+
+### 1. Hai trường hợp AI hỗ trợ hiệu quả (Làm tốt)
+- **Trường hợp 1 – Sinh khung Unit Test và bộ 31 Test Cases (`HT-01` đến `HT-15`):** AI giúp tổng hợp nhanh các kịch bản kiểm thử biên và bảo mật (`HT-NFR1` đến `HT-NFR4`) như kiểm tra lỗi chia cho 0 khi khóa học có `0` bài học, hoặc kiểm tra chặn ghi danh trùng lần 2 trong `EnrollmentServiceTest`, giúp rút ngắn hơn 60% thời gian soạn tài liệu QA.
+- **Trường hợp 2 – Rà soát xung đột merge và kiểm tra quyền sở hữu (`HT-NFR3`):** Khi gộp các nhánh `feature/HT-11-cau-hoi` và `feature/HT-04-tien-do` vào `develop`, AI hỗ trợ phát hiện nhanh đoạn route trùng lặp trong `routes/web.php` và đề xuất hàm `authorizeCourseOwner()` chặn giảng viên truy cập chéo khóa học của người khác.
+
+### 2. Hai trường hợp AI đưa ra kết quả chưa chính xác (Cần tự kiểm tra và chỉnh sửa)
+- **Trường hợp 1 – Lệch mã chức năng và đường dẫn view/route thực tế:** Ở lần gợi ý đầu tiên, AI tự suy đoán `HT-01` là Đăng nhập và `HT-02` là Danh sách khóa học, đồng thời trả về đường dẫn view `courses.my-courses` thay vì `student.my-courses`. Tôi phải đối chiếu lại tài liệu Đặc tả E2 của giảng viên và cây thư mục thật của nhóm để sắp xếp lại toàn bộ mã `HT-01`–`HT-15` và sửa đúng tên route.
+- **Trường hợp 2 – Tạo dữ liệu giả định gây lỗi khi chưa merge đủ nhánh:** Trong hàm tính `% tiến độ` (`Course::getProgressStats`), code AI viết ban đầu truy vấn thẳng bảng `lesson_progress` mà không kiểm tra bảng đã tồn tại hay chưa, dẫn đến lỗi khi chạy trên nhánh chưa merge `HT-05`. Tôi đã tự bổ sung điều kiện `Schema::hasTable('lesson_progress')` và xử lý riêng trường hợp `total = 0` để tránh lỗi `DivisionByZeroError`.
