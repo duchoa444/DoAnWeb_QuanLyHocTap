@@ -4,7 +4,7 @@ Mỗi thành viên một tệp trong `ai-logs/`. Ghi một mục ngay sau mỗi 
 
 | Mục | Thông tin |
 | :--- | :--- |
-| **Họ tên, MSSV** | Nguyễn Thành Nhân – `[Điền MSSV của bạn]` |
+| **Họ tên, MSSV** | Nguyễn Thành Nhân – `0306241315` |
 | **Nhóm, đề tài** | Nhóm 4 – Đề tài E: Quản lý học tập trực tuyến (`DoAnWeb_QuanLyHocTap`) |
 | **Vai trò** | TV5 – Git & Kiểm thử (QA) |
 | **Công cụ AI dùng** | Gemini |
