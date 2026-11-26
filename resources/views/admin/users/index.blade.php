@@ -3,11 +3,7 @@
 <main style="max-width: 1200px; margin: 30px auto; padding: 0 20px;">
     <h2>Quản lý người dùng</h2>
 
-    @if (session('success'))
-        <div role="status" style="padding: 12px; margin-bottom: 16px; background: #e8f5e9; color: #2e7d32; border-radius: 4px;">
-            {{ session('success') }}
-        </div>
-    @endif
+   
 
     @if ($errors->any())
         <div role="alert" style="padding: 12px; margin-bottom: 16px; background: #ffebee; color: #c62828; border-radius: 4px;">

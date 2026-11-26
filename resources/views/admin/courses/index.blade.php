@@ -8,11 +8,7 @@
         </a>
     </div>
 
-    @if(session('success'))
-        <div style="padding: 12px 16px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 6px; margin-bottom: 16px;">
-            {{ session('success') }}
-        </div>
-    @endif
+    
 
     @if(session('error'))
         <div style="padding: 12px 16px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 6px; margin-bottom: 16px;">

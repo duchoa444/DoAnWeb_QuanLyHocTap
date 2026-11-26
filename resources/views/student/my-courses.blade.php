@@ -8,11 +8,7 @@
         </a>
     </div>
 
-    @if(session('success'))
-        <div style="padding: 12px 16px; margin-bottom: 16px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 6px;">
-            {{ session('success') }}
-        </div>
-    @endif
+    
 
     @if($courses->isEmpty())
         <div style="background: #fff; padding: 40px 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">

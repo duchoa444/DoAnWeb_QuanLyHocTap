@@ -4,11 +4,7 @@
 <div style="padding: 20px; max-width: 1200px; margin: 0 auto;">
     <h2 style="margin-bottom: 20px;">Danh sách khóa học</h2>
 
-    @if (session('success'))
-        <div role="status" style="padding: 12px; margin-bottom: 20px; background: #e8f5e9; color: #2e7d32; border-radius: 4px;">
-            {{ session('success') }}
-        </div>
-    @endif
+    
 
     {{-- Form tìm kiếm theo tên; lọc theo danh mục, giảng viên --}}
     <form method="GET" action="{{ route('courses.index') }}" style="background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
