@@ -73,6 +73,18 @@ Hỗ trợ triển khai chức năng quản lý bài học (HT-10)
 - **Áp dụng:** Triển khai các phần xử lý bài học và giao diện quản lý bài học của giảng viên.
 - **Kết quả:** Xây dựng được các phần chính của HT-10 và tiếp tục kiểm tra hoạt động của chức năng.
 
+## Ngày 8 - Hoàn thiện và kiểm thử chức năng HT-10
+
+Kiểm tra lại chức năng quản lý bài học, phát hiện trang quản lý khóa học chưa có nút truy cập bài học nên bổ sung route trong routes/web.php và nút Bài học trong teacher/courses/index.blade.php.
+
+Kiểm thử thao tác thêm, sửa, xóa bài học; tải file PDF và nhúng video YouTube. Kiểm tra thêm chức năng sắp xếp thứ tự bài học.
+
+Sử dụng AI hỗ trợ kiểm tra luồng hoạt động và xác định nguyên nhân khi truy cập trang học bằng tài khoản sinh viên.
+
+Cập nhật code lên nhánh develop với commit 58477d1 (cap nhat ht-10).
+
+Khi kiểm tra phía sinh viên, phát hiện lỗi database chưa có bảng lesson_comments. Cần tiếp tục kiểm tra migration và khắc phục để hoàn thiện trang học.
+
 ## Ngày 9 – Kiểm tra quyền sở hữu và dữ liệu demo
 
  Hỗ trợ chuẩn bị dữ liệu demo cho hệ thống
