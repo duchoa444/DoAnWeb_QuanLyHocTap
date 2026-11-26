@@ -85,6 +85,7 @@
         </div>
     </div>
 
+
     {{-- Khối 2: Lịch sử làm bài trắc nghiệm & Điểm số --}}
     <div id="exam-history" style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px;">
         <h2 style="margin-top: 0; font-size: 18px; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 10px;">
@@ -97,64 +98,52 @@
                     <tr style="background: #f1f3f5; text-align: left;">
                         <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">#</th>
                         <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Khóa học</th>
-                        <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Bài trắc nghiệm</th>
+                        <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Bắt đầu làm</th>
+                        <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Thời gian nộp</th>
                         <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Điểm số</th>
                         <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Đánh giá</th>
-                        <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Thời gian nộp</th>
                     </tr>
                 </thead>
-                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-    <thead>
-        <tr style="background: #f1f3f5; text-align: left;">
-            <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">#</th>
-            <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Khóa học</th>
-            <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Bắt đầu làm</th>
-            <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Thời gian nộp</th>
-            <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Điểm số</th>
-            <th style="padding: 10px 12px; border-bottom: 2px solid #dee2e6;">Đánh giá</th>
-        </tr>
-    </thead>
-    <tbody>
-        @forelse($attempts as $index => $attempt)
-            @php
-                $score = $attempt->score ?? 0;
-                $isPassed = $score >= 5;
-            @endphp
-            <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 10px 12px;">{{ $attempts->firstItem() + $index }}</td>
-                <td style="padding: 10px 12px; font-weight: bold;">
-                    {{ $attempt->course->title ?? 'Khóa học #' . $attempt->course_id }}
-                </td>
-                <td style="padding: 10px 12px; color: #666;">
-                    {{ $attempt->started_at?->format('d/m/Y H:i') ?? '—' }}
-                </td>
-                <td style="padding: 10px 12px; color: #666;">
-                    {{ ($attempt->submitted_at ?? $attempt->created_at)?->format('d/m/Y H:i') }}
-                </td>
-                <td style="padding: 10px 12px; font-weight: bold; color: #007bff;">
-                    {{ number_format($score, 2) }} / 10
-                </td>
-                <td style="padding: 10px 12px;">
-                    @if($isPassed)
-                        <span style="padding: 3px 8px; background: #d4edda; color: #155724; border-radius: 4px; font-size: 12px; font-weight: bold;">
-                            Đạt
-                        </span>
-                    @else
-                        <span style="padding: 3px 8px; background: #f8d7da; color: #721c24; border-radius: 4px; font-size: 12px; font-weight: bold;">
-                            Chưa đạt
-                        </span>
-                    @endif
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="6" style="padding: 20px; text-align: center; color: #777;">
-                    Bạn chưa thực hiện bài kiểm tra trắc nghiệm nào.
-                </td>
-            </tr>
-        @endforelse
-    </tbody>
-</table>
+                <tbody>
+                    @forelse($attempts as $index => $attempt)
+                        @php
+                            $score = $attempt->score ?? 0;
+                            $isPassed = $score >= 5;
+                        @endphp
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 10px 12px;">{{ $attempts->firstItem() + $index }}</td>
+                            <td style="padding: 10px 12px; font-weight: bold;">
+                                {{ $attempt->course->title ?? 'Khóa học #' . $attempt->course_id }}
+                            </td>
+                            <td style="padding: 10px 12px; color: #666;">
+                                {{ $attempt->started_at?->format('d/m/Y H:i') ?? '—' }}
+                            </td>
+                            <td style="padding: 10px 12px; color: #666;">
+                                {{ ($attempt->submitted_at ?? $attempt->created_at)?->format('d/m/Y H:i') }}
+                            </td>
+                            <td style="padding: 10px 12px; font-weight: bold; color: #007bff;">
+                                {{ number_format($score, 2) }} / 10
+                            </td>
+                            <td style="padding: 10px 12px;">
+                                @if($isPassed)
+                                    <span style="padding: 3px 8px; background: #d4edda; color: #155724; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                                        Đạt
+                                    </span>
+                                @else
+                                    <span style="padding: 3px 8px; background: #f8d7da; color: #721c24; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                                        Chưa đạt
+                                    </span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" style="padding: 20px; text-align: center; color: #777;">
+                                Bạn chưa thực hiện bài kiểm tra trắc nghiệm nào.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
             </table>
         </div>
 
@@ -162,6 +151,4 @@
             {{ $attempts->links() }}
         </div>
     </div>
-
-</div>
 @include('footer')
