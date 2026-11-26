@@ -8,6 +8,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\Teacher\CourseController as TeacherCourseController;
+use App\Http\Controllers\Teacher\LessonController;
 use App\Http\Controllers\Teacher\QuestionController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
@@ -33,66 +34,125 @@ Route::get('/courses/{course}', [CourseController::class, 'show'])->name('course
 
 // Học bài & đánh dấu hoàn thành (HT-05)
 Route::middleware('auth')->group(function () {
-    Route::get('/courses/{course}/learn/{lesson?}', [CourseController::class, 'learn'])->name('courses.learn');
-    Route::post('/courses/{course}/lessons/{lesson}/complete', [CourseController::class, 'completeLesson'])->name('lessons.complete');
+    Route::get('/courses/{course}/learn/{lesson?}', [CourseController::class, 'learn'])
+        ->name('courses.learn');
+
+    Route::post('/courses/{course}/lessons/{lesson}/complete', [CourseController::class, 'completeLesson'])
+        ->name('lessons.complete');
 });
+
 // Bình luận bài học (HT-08)
 Route::middleware(['auth'])->group(function () {
     Route::post('/lessons/{lesson}/comments', [LessonCommentController::class, 'store'])
         ->name('lesson.comments.store');
+
     Route::delete('/lesson-comments/{comment}', [LessonCommentController::class, 'destroy'])
         ->name('lesson.comments.destroy');
 });
+
 // Phân hệ học viên (Student)
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/dashboard', fn () => 'Xin chào! Đây là trang học viên.');
 
     // Ghi danh & Khóa học của tôi (HT-04, HT-05)
-    Route::get('/my-courses', [EnrollmentController::class, 'myCourses'])->name('student.my-courses');
-    Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])->name('courses.enroll');
+    Route::get('/my-courses', [EnrollmentController::class, 'myCourses'])
+        ->name('student.my-courses');
+
+    Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store'])
+        ->name('courses.enroll');
 
     // Làm bài trắc nghiệm (HT-06)
-    Route::get('/courses/{courseId}/quiz', [QuizController::class, 'show'])->name('student.quizzes.show');
-    Route::match(['get', 'post'], '/courses/{courseId}/quiz/start', [QuizController::class, 'show'])->name('quiz.start');
-    Route::post('/quiz/{attemptId}/submit', [QuizController::class, 'submit'])->name('student.quizzes.submit');
-    Route::post('/quizzes/{attemptId}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
-    Route::get('/quiz/{attemptId}/result', [QuizController::class, 'result'])->name('student.quizzes.result');
-    Route::get('/quizzes/{attemptId}/result', [QuizController::class, 'result'])->name('quiz.result');
+    Route::get('/courses/{courseId}/quiz', [QuizController::class, 'show'])
+        ->name('student.quizzes.show');
+
+    Route::match(['get', 'post'], '/courses/{courseId}/quiz/start', [QuizController::class, 'show'])
+        ->name('quiz.start');
+
+    Route::post('/quiz/{attemptId}/submit', [QuizController::class, 'submit'])
+        ->name('student.quizzes.submit');
+
+    Route::post('/quizzes/{attemptId}/submit', [QuizController::class, 'submit'])
+        ->name('quiz.submit');
+
+    Route::get('/quiz/{attemptId}/result', [QuizController::class, 'result'])
+        ->name('student.quizzes.result');
+
+    Route::get('/quizzes/{attemptId}/result', [QuizController::class, 'result'])
+        ->name('quiz.result');
 
     // Hồ sơ cá nhân & Lịch sử thi (HT-07)
-    Route::get('/profile', [StudentProfileController::class, 'index'])->name('student.profile');
-    Route::put('/profile', [StudentProfileController::class, 'updateProfile'])->name('student.profile.update');
-    Route::put('/profile/password', [StudentProfileController::class, 'updatePassword'])->name('student.password.update');
-    Route::get('/exam-history', [StudentProfileController::class, 'index'])->name('student.exam-history');
+    Route::get('/profile', [StudentProfileController::class, 'index'])
+        ->name('student.profile');
+
+    Route::put('/profile', [StudentProfileController::class, 'updateProfile'])
+        ->name('student.profile.update');
+
+    Route::put('/profile/password', [StudentProfileController::class, 'updatePassword'])
+        ->name('student.password.update');
+
+    Route::get('/exam-history', [StudentProfileController::class, 'index'])
+        ->name('student.exam-history');
 });
 
-// Phân hệ giảng viên (HT-09, HT-11, HT-12, HT-08)
+// Phân hệ giảng viên
 Route::middleware(['auth', 'role:teacher'])
     ->prefix('teacher')
     ->name('teacher.')
     ->group(function () {
+
         Route::get('/dashboard', function () {
             return 'Xin chào! Đây là trang giảng viên.';
         })->name('dashboard');
 
+        // Quản lý khóa học
         Route::resource('courses', TeacherCourseController::class)
             ->except(['show']);
+
+        // Quản lý bài học - HT-10
+        Route::get('/courses/{courseId}/lessons', [LessonController::class, 'index'])
+            ->name('lessons.index');
+
+        Route::get('/courses/{courseId}/lessons/create', [LessonController::class, 'create'])
+            ->name('lessons.create');
+
+        Route::post('/courses/{courseId}/lessons', [LessonController::class, 'store'])
+            ->name('lessons.store');
+
+        Route::get('/courses/{courseId}/lessons/{lessonId}/edit', [LessonController::class, 'edit'])
+            ->name('lessons.edit');
+
+        Route::put('/courses/{courseId}/lessons/{lessonId}', [LessonController::class, 'update'])
+            ->name('lessons.update');
+
+        Route::delete('/courses/{courseId}/lessons/{lessonId}', [LessonController::class, 'destroy'])
+            ->name('lessons.destroy');
+
+        Route::patch('/courses/{courseId}/lessons/{lessonId}/move', [LessonController::class, 'move'])
+            ->name('lessons.move');
+
+        Route::get('/courses/{courseId}/lessons/{lessonId}/pdf', [LessonController::class, 'downloadPdf'])
+            ->name('lessons.pdf');
 
         // Quản lý câu hỏi trắc nghiệm - HT-11
         Route::get('/courses/{course}/questions', [QuestionController::class, 'index'])
             ->name('questions.index');
+
         Route::patch('/courses/{course}/quiz-duration', [QuestionController::class, 'updateDuration'])
             ->name('questions.duration');
+
         Route::post('/courses/{course}/questions', [QuestionController::class, 'store'])
             ->name('questions.store');
+
         Route::put('/courses/{course}/questions/{question}', [QuestionController::class, 'update'])
             ->name('questions.update');
+
         Route::delete('/courses/{course}/questions/{question}', [QuestionController::class, 'destroy'])
             ->name('questions.destroy');
 
         // Quản lý đề thi - HT-12
         Route::get('/exams', [App\Http\Controllers\Teacher\ExamController::class, 'index'])
             ->name('exams.index');
+
         Route::get('/exams/export', [App\Http\Controllers\Teacher\ExamController::class, 'export'])
             ->name('exams.export');
 
@@ -100,11 +160,13 @@ Route::middleware(['auth', 'role:teacher'])
         Route::get('/qna', [App\Http\Controllers\Teacher\QnaController::class, 'index'])
             ->name('qna.index');
     });
+
 // Phân hệ quản trị viên (Admin)
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
         Route::get('/dashboard', function () {
             return 'Xin chào! Đây là trang quản trị viên.';
         })->name('dashboard');
@@ -112,23 +174,27 @@ Route::middleware(['auth', 'role:admin'])
         // Quản lý tài khoản
         Route::get('/users', [UserManagementController::class, 'index'])
             ->name('users.index');
+
         Route::post('/users', [UserManagementController::class, 'store'])
             ->name('users.store');
+
         Route::patch('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
             ->name('users.toggle-status');
 
         // Duyệt và ẩn khóa học (HT-15)
         Route::get('/courses', [AdminCourseController::class, 'index'])
             ->name('courses.index');
+
         Route::get('/approve-courses', [AdminCourseController::class, 'index'])
             ->name('courses.approve-page');
+
         Route::patch('/courses/{course}/approve', [AdminCourseController::class, 'approve'])
             ->name('courses.approve');
+
         Route::patch('/courses/{course}/hide', [AdminCourseController::class, 'hide'])
             ->name('courses.hide');
-        
+
         // Quản lý danh mục
         Route::resource('categories', AdminCategoryController::class)
             ->only(['index', 'store', 'update', 'destroy']);
-        
     });

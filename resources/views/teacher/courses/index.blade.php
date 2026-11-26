@@ -5,7 +5,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;">
         <div>
             <h2 style="margin: 0 0 8px;">Quản lý khóa học</h2>
-            <p style="color: #666; margin: 0;">Quản lý các khóa học và đề thi trắc nghiệm do bạn tạo.</p>
+            <p style="color: #666; margin: 0;">Quản lý các khóa học, bài học và đề thi trắc nghiệm do bạn tạo.</p>
         </div>
 
         <a href="{{ route('teacher.courses.create') }}"
@@ -14,11 +14,15 @@
         </a>
     </div>
 
-
-
     @if(session('error'))
         <div style="padding: 12px 16px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 6px; margin-bottom: 16px;">
             {{ session('error') }}
+        </div>
+    @endif
+
+    @if(session('success'))
+        <div style="padding: 12px 16px; background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; border-radius: 6px; margin-bottom: 16px;">
+            {{ session('success') }}
         </div>
     @endif
 
@@ -86,6 +90,12 @@
                         </td>
 
                         <td style="padding: 13px; text-align: center; white-space: nowrap;">
+
+                            <a href="{{ route('teacher.lessons.index', $course->id) }}"
+                               style="color: #0d6efd; text-decoration: none; margin-right: 10px; font-weight: 600;">
+                                Bài học
+                            </a>
+
                             <a href="{{ route('teacher.questions.index', $course->id) }}"
                                style="color: #198754; text-decoration: none; margin-right: 10px; font-weight: 500;">
                                 Đề thi
