@@ -12,7 +12,7 @@ Nền tảng khóa học trực tuyến miễn phí cho phép **Giảng viên** 
 
 | Thành viên | Vai trò | Mã chức năng phụ trách | Tài liệu & Nhiệm vụ bổ sung |
 | :--- | :--- | :--- | :--- |
-| **TV1** | Trưởng nhóm (PM / Scrum Master) | `HT-07`, `HT-14`, `HT-15` | Chương 1, 2, 9, 10; Ghép báo cáo & Slide |
+| **TV1** | Trưởng nhóm (PM / Scrum Master) | `HT-07`, `HT-08`, `HT-12`, `HT-14`, `HT-15`, | Chương 1, 2, 9, 10; Ghép báo cáo & Slide |
 | **TV2** | Backend Lead | `HT-03`, `HT-06` | Chương 5 (Kiến trúc), Chương 6 (Thuật toán chấm thi) |
 | **TV3** | Frontend Lead | `HT-01`, `HT-02`, `HT-05` | Chương 5 (Giao diện); Quay & dựng Video demo |
 | **TV4** | Cơ sở dữ liệu (Database) | `HT-09`, `HT-10` | Chương 3 (Công nghệ), Chương 5 (CSDL & ERD); Dữ liệu mẫu |
