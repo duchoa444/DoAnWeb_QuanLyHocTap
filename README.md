@@ -24,7 +24,7 @@ Nền tảng khóa học trực tuyến miễn phí cho phép **Giảng viên** 
 
 - **Backend:** PHP 8.2+, Laravel Framework 11.x
 - **Frontend:** Blade Template, Bootstrap 5, JavaScript
-- **Cơ sở dữ liệu:** SQLite (mặc định chạy nhanh trên máy sạch) hoặc MySQL 8.0+
+- **Cơ sở dữ liệu:** MySQL-Xampp (mặc định chạy nhanh trên máy sạch)
 - **Quản lý mã nguồn & Tiến độ:** Git, GitHub, Trello
 
 ---
@@ -53,7 +53,7 @@ Nền tảng khóa học trực tuyến miễn phí cho phép **Giảng viên** 
       php artisan key:generate
 
 **Bước 4: Khởi tạo Cơ sở dữ liệu & Nạp dữ liệu mẫu (Migration + Seed)**
-- Nếu dùng **SQLite** (khuyên dùng để chạy nhanh trong 1 phút): đảm bảo tệp `database/database.sqlite` tồn tại (tạo tệp trống nếu chưa có) và giữ `DB_CONNECTION=sqlite` trong `.env`.
+- Nếu dùng **MySQL** (khuyên dùng để chạy nhanh trong 1 phút): đảm bảo tệp `database/database.mysql` tồn tại (tạo tệp trống nếu chưa có) và giữ `DB_CONNECTION=mysql` trong `.env`.
 - Chạy lệnh tạo bảng và nạp dữ liệu mẫu (có thể chạy lại nhiều lần để reset dữ liệu sạch):
       php artisan migrate:fresh --seed
 
