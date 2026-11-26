@@ -24,11 +24,7 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div style="padding: 12px; margin-bottom: 15px; background: #d1e7dd; color: #0f5132; border-radius: 5px;">
-            {{ session('success') }}
-        </div>
-    @endif
+   
 
     <div style="background: white; border: 1px solid #ddd; border-radius: 8px; overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; min-width: 750px;">

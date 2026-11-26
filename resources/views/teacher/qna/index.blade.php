@@ -16,11 +16,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div style="padding: 12px 16px; margin-bottom: 16px; background: #dcfce7; color: #166534; border-radius: 6px; font-size: 14px;">
-            {{ session('success') }}
-        </div>
-    @endif
 
     @if(session('error'))
         <div style="padding: 12px 16px; margin-bottom: 16px; background: #fee2e2; color: #991b1b; border-radius: 6px; font-size: 14px;">
