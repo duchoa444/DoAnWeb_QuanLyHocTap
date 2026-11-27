@@ -15,7 +15,7 @@ class EnrollmentService
      */
     public function enroll(User $student, Course $course): Enrollment
     {
-        if ($course->status !== 'published') {
+        if (!in_array($course->status, ['published', 'public'])) {
             throw new Exception('Khóa học này chưa được công khai.');
         }
 

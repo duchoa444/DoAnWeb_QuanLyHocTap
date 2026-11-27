@@ -20,11 +20,6 @@
         </div>
     @endif
 
-    @if(session('success'))
-        <div style="padding: 12px 16px; background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; border-radius: 6px; margin-bottom: 16px;">
-            {{ session('success') }}
-        </div>
-    @endif
 
     <form method="GET" action="{{ route('teacher.courses.index') }}"
           style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 8px;">
